@@ -110,17 +110,29 @@ func GetTrailHTML(settings jsonfuncs.Settings, folderLocation string, currentBas
 // -------------------------
 
 func HtmlAudio(src string) string { // HTML output for displaying an audio file
-	return "<img src='" + src + "' />"
+	fileSplit := strings.Split(src, ".")
+	fileType := strings.ToLower(fileSplit[len(fileSplit)-1])
+
+	if fileType == "mp3" { // With the other formats, the file type equals the MIME type. MP3 has MIME type mpeg.
+		fileType = "mpeg"
+	}
+
+	return `
+        <audio controls>
+          <source src="` + src + `" type="audio/` + fileType + `">
+          Your browser does not support the audio tag.<br /><a href="` + src + `">Open the file.</a>
+        </audio>
+        `
 }
 
 func HtmlVideo(src string) string { // HTML output for displaying a video file
-	fileSplit := strings.Split(src, "/")
+	fileSplit := strings.Split(src, ".")
 	fileType := strings.ToLower(fileSplit[len(fileSplit)-1])
 
 	return `
         <video controls>
           <source src="` + src + `" type="video/` + fileType + `">
-          Your browser does not support the video tag.
+          Your browser does not support the video tag.<br /><a href="` + src + `">Open the file.</a>
         </video> 
         `
 }
