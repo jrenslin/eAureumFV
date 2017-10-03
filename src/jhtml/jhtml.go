@@ -53,8 +53,8 @@ func Print_page(w http.ResponseWriter, r *http.Request, content string, id strin
 
 // Function to split a filepath into it's folders and return them as an array
 func GetTrail(path string, basePath string) []string {
-	applicablePath := path[len(basePath):]
-	output := strings.Split(applicablePath, "/")
+	applicablePath := path[len(basePath):]       // Remove the base path.
+	output := strings.Split(applicablePath, "/") // Split remaining path
 	return output
 }
 
@@ -73,7 +73,12 @@ func GetTrailHTML(settings jsonfuncs.Settings, folderLocation string, currentBas
 	// Start filling output var
 	// The main directory is always linked in the same way
 	output := "<p class='trail'><a href='/' id='link0'>/</a>"
-	output += "<a href='/dir?p=" + folderNo + "' id='link0ctrl'>" + filepath.Base(settings.Folders[folderNoInt]) + "</a>"
+	fmt.Println(len(trailelements))
+	if len(trailelements) == 1 { // The keybinding for going up (CTRL+Up) takes precedence over the general one for second level dirs.
+		output += "<a href='/dir?p=" + folderNo + "' id='goUp'>" + filepath.Base(settings.Folders[folderNoInt]) + "</a>"
+	} else {
+		output += "<a href='/dir?p=" + folderNo + "' id='link0ctrl'>" + filepath.Base(settings.Folders[folderNoInt]) + "</a>"
+	}
 
 	for _, f := range trailelements {
 		trailLink = trailLink + "/" + f
