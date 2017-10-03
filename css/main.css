@@ -1,0 +1,104 @@
+/* Loading Fonts */ 
+@font-face {
+    font-family: Quicksand;
+    src: url(./Quicksand-Regular.ttf);
+}
+
+html { margin: 0px; padding: 0px; }
+body { margin: 0px; padding: 0px; font-family: Quicksand; font-size: 1.25em; background: #fff; }
+
+/*** General ***/
+/* Side-structure elements */
+main         { background: #fff; padding: 0px 0px 1em 0px; }
+section      { background: #fff; padding: 1em 0px; }
+main > *     { padding: 0px 10vw; }
+section:not(section.fullpage) > *  { padding: 0px 10vw; }
+
+/* Specific text elements */
+h1      { display: block; margin: 0px; padding: 0.7em 10vw; background: #fff; color: #888; }
+a       { text-decoration: none; color:#888; }
+a:hover { animation: linkChangeColor 0.5s; background: #888; color: #fff; }
+
+/* Forms */
+label      { display: block; color: #888; font-weight: bold; }
+input      { width: 20em; margin: 0.5em 0px; padding: 5px; border: 3px solid #ddd; border-radius: 5px; font-weight: bold; }
+textarea   { width: 23em; margin: 0.5em 0px; padding: 5px; border: 3px solid #ddd; border-radius: 5px; }
+button     { display: block; padding: 0.7em 1.2em; border: 3px solid #ddd; border-radius: 5px; color: #888; font-size: 0.9em; }
+button:hover { animation: buttonChangeColor 0.5s; color: #fff; background: #888; }
+
+/* Tables */
+table                { width: 80vw; margin:1.5em 10vw; padding: 0px; border-collapse: collapse; }
+table tr             { position: relative; border-bottom: 1px solid #eee; }
+table tr:hover       { animation: minimalBgColorization 0.5s; background: #eee; }
+table tr > th        { padding: 0.5em 0px; text-align: left; }
+table tr > td        { padding: 0.5em 0px; text-align: left; color: #888; }
+table tr > td:before { position: absolute; top: 50%; transform: translate(0px, -50%); right: calc(100% + 1em); }
+
+/*** Generally used, specific elements ***/
+a.buttonlike       { display: inline-block; width: auto; padding: 0.7em 1.2em; border: 3px solid #ddd; border-radius: 5px; 0.9em; }
+a.buttonlike:hover { animation: buttonChangeColor 0.5s; color: #fff; background: #888; }
+p.note             { display: block; font-size: 0.8em; margin: 0.5em 0px; padding: 0px 0px; }
+
+/*** Trail ***/
+p.trail            { margin: 0px 0px; padding: 0.7em 10vw; font-size: 0.9em; background: #3d3d3d; }
+p.trail a          { color: #ccc; vertical-align: middle;  }
+p.trail a:before   { display: inline-block; content: " > "; padding: 0px 0.5em; vertical-align: top; color: #888; }
+p.trail a:first-child:before  { display: none; }
+
+/*** Tiles ***/
+ul.tiles               { display: block; margin-left: -1em; padding: 1em 10vw; }
+ul.tiles li            { display: inline-block; }
+ul.tiles li a          { display: inline-block; margin: 1em; padding: 1em; text-align: center; color: #888; border: 2px solid #ddd; border-radius: 5px; }
+ul.tiles li a:hover    { animation: ; color: #fff; }
+ul.tiles li a:before   { display: block; margin-bottom: 0.2em; font-size: 4em; padding: 0px 0.5em; }
+
+/*** Fullpage: Pages that display text only and are centered. E.g. the setup page. ***/
+section.fullpage    { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: 800px; }
+section.fullpage h1 { padding-left: 0px; }
+
+/*** Paged sections ***/
+section#page1, section#page2, section#page3, section#page4, section#page5 { display: none; }
+section:target#page1, section:target#page2, section:target#page3, section:target#page4, section:target#page5 { display: block; animation: fade-in 0.8s; }
+
+/*** Specific pages ***/
+/* File preview page */
+body#file                   {  }
+body#file main h1           { display: block; }
+body#file main p.trail      { display: block; top: 6em; }
+body#file main div.preview  { position: relative; height: calc(100vh - 14em); margin: 0px 0px; padding-top: 6em; background: #111; }
+body#file div.preview > *   { position: absolute; display: block; top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: calc(100% - 2em); }
+
+body#file a[rel="prev"]     { position: absolute; display: inline-block; left: 0px; top: 50%; translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
+body#file a[rel="next"]     { position: absolute; display: inline-block; right: 0px; top: 50%; translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
+
+a[rel="prev"]:before { display: inline-block; content: " \0025C0 ";  }
+a[rel="next"]:before { display: inline-block; content: " \0025B6 ";  }
+
+/*** Filetype specific classes determine what symbol is to be displayed ***/
+.directory:before { display: inline-block; content: " \01F4C1 "; }
+.image:before     { display: inline-block; content: " \01F5BB "; }
+.webpage:before   { display: inline-block; content: " \01F5BA "; }
+
+/* Animations */
+/**/
+@keyframes appear {
+    from { opacity:0.2; }
+    to   { opacity:1.0; }
+}
+@keyframes fade-in {
+    from { opacity: 0.4; }
+    to   { opacity: 1.0; }
+}
+@keyframes linkChangeColor {
+    from { color: #888; background: #fff; }
+    to   { color: #fff; background: #888; }
+}
+@keyframes buttonChangeColor {
+    from { color: #888; background: #fff; }
+    to   { color: #fff; background: #888; }
+}
+@keyframes minimalBgColorization {
+    from { background: #fff; }
+    to   { background: #eee; }
+}
+
