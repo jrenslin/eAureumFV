@@ -20,16 +20,6 @@ const timeFormat = "[2006-01-02 15:04:05] "
 
 var Settings jsonfuncs.Settings
 
-var fileTypes = map[string][]string{
-	"audio":      []string{".mp3", ".m4a", ".ogg"},
-	"video":      []string{".mp4", ".webm"},
-	"image":      []string{".gif", ".jpg", ".jpeg", ".png", ".bmp"},
-	"webpage":    []string{".htm", ".html"},
-	"plaintext":  []string{".txt"},
-	"code":       []string{".py", ".php"},
-	"compressed": []string{".zip", ".rar", ".7z", ".7zip", ".cbr"},
-}
-
 // Function to check if the list of folders to be served is empty.
 // If that is the case, run setup.
 func checkForSettings(w http.ResponseWriter, r *http.Request) bool {
@@ -38,89 +28,6 @@ func checkForSettings(w http.ResponseWriter, r *http.Request) bool {
 	} else {
 		return false
 	}
-
-}
-
-// Function to split a filepath into it's folders and return them as an array
-func getTrail(path string, basePath string) []string {
-	applicablePath := path[len(basePath):]
-	output := strings.Split(applicablePath, "/")
-	return output
-}
-
-// Function to form the trail  in HTML
-func getTrailHTML(folderLocation string, currentBaseDir string, folderNr string) string {
-
-	// Check if the current folderLocation variable leads to a file or folder
-	file, err := os.Stat(folderLocation)
-	jbasefuncs.Check(err)
-	isDir := file.IsDir()
-
-	output := "<p class='trail'><a href='/' id='link0'>/</a>"
-	folderNrInt, _ := strconv.Atoi(folderNr)
-	// Get elements to loop over; externalized to check the position
-	trailelements := getTrail(folderLocation, currentBaseDir)[1:]
-	trailLink := folderNr
-	output += "<a href='/dir?p=" + folderNr + "' id='link0ctrl'>" + filepath.Base(Settings.Folders[folderNrInt]) + "</a>"
-	for _, f := range trailelements {
-		trailLink = trailLink + "/" + f
-		switch {
-		case isDir && len(trailelements) > 1 && f == trailelements[len(trailelements)-2]:
-			output += "<a href='/dir?p=" + trailLink + "' id='goUp'>" + f + "</a>"
-		case isDir == false && len(trailelements) > 1 && f == trailelements[len(trailelements)-2]:
-			output += "<a href='/dir?p=" + trailLink + "' id='goUp'>" + f + "</a>"
-		case isDir == false && f == trailelements[len(trailelements)-1]:
-			output += "<a href='/file?p=" + trailLink + "'>" + f + "</a>"
-		default:
-			output += "<a href='/dir?p=" + trailLink + "'>" + f + "</a>"
-		}
-	}
-	output += "</p>"
-	return output
-}
-
-// Function to get a folder's contents, returning them distinguishing files and folders
-func scandirFilesFolders(folder string) map[string][]string {
-	all := jbasefuncs.Scandir(folder)
-	output := map[string][]string{}
-
-	for _, file := range all {
-		fileInfo, err := os.Stat(file)
-		jbasefuncs.Check(err)
-		if fileInfo.IsDir() {
-			output["folders"] = append(output["folders"], file)
-		} else {
-			output["files"] = append(output["files"], file)
-		}
-	}
-	return output
-}
-
-func getKindOfFile(filename string) string {
-
-	extension := strings.ToLower(filepath.Ext(filename))
-	for output, extensions := range fileTypes {
-		if jbasefuncs.InArrayStr(extension, extensions) {
-			return output
-		}
-	}
-	return "other"
-}
-
-func HumanFilesize(filesize int64) string {
-
-	fileSize := float32(filesize)
-	switch {
-	case fileSize > 1099511627776: // 1099511627776 = 1024*1024*1024*1024
-		return fmt.Sprintf("%.2f", fileSize/1099511627776) + " TB"
-	case fileSize > 1073741824: // 1073741824 = 1024*1024*1024
-		return fmt.Sprintf("%.2f", fileSize/1073741824) + " GB"
-	case fileSize > 1048576: // 1048576 = 1024 * 1024
-		return fmt.Sprintf("%.2f", fileSize/1048576) + " MB"
-	case fileSize > 1024:
-		return fmt.Sprintf("%.2f", fileSize/1024) + " KB"
-	}
-	return fmt.Sprint(filesize) + " B"
 
 }
 
@@ -142,6 +49,7 @@ func ServeStaticText(w http.ResponseWriter, r *http.Request) {
 	jhtml.Print_page(w, r, content, path, jhtml.Get_metatags("Tickets", "icon", "description", "keywords"))
 }
 
+// Prints the welcome and setup page
 func serveSetup(w http.ResponseWriter, r *http.Request) {
 
 	content := `
@@ -204,7 +112,7 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 }
 
 // Function serving the start page
-//
+// Lists all folders from settings
 func serveStartPage(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the setup needs to be run
@@ -215,8 +123,8 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 	}
 	content := "<main>\n"
 
-	content += "<h1>A File Server</h1>"
-	content += "<p class='trail'><a href='/'>/</a></p>"
+	content += "<h1>A File Server</h1>\n"
+	content += "<p class='trail'><a href='/' id='link0'>/</a></p>\n"
 
 	content += "<ul class='tiles'>\n"
 	for folderNr, folder := range Settings.Folders {
@@ -249,7 +157,7 @@ func serveDirectory(w http.ResponseWriter, r *http.Request) {
 	if folderLocation == "" {
 		http.Redirect(w, r, "/", 301)
 	}
-	folderContents = scandirFilesFolders(folderLocation)
+	folderContents = jbasefuncs.ScandirFilesFolders(folderLocation)
 
 	// Write content / output
 	content := "<main>\n" // Initialize content variable
@@ -257,7 +165,7 @@ func serveDirectory(w http.ResponseWriter, r *http.Request) {
 	// Add folders to content
 	content += "<h1>" + filepath.Base(folderLocation) + "</h1>\n"
 
-	content += getTrailHTML(folderLocation, currentBaseDir, folderNr)
+	content += jhtml.GetTrailHTML(Settings, folderLocation, currentBaseDir, folderNr)
 
 	// Print table of files and folders
 	content += "\n\n<table>\n"
@@ -282,9 +190,9 @@ func serveDirectory(w http.ResponseWriter, r *http.Request) {
 
 		file = strings.Replace(file, currentBaseDir, "", 1)
 		content += "<tr>\n"
-		content += "<td class='" + getKindOfFile(file) + "'>"
+		content += "<td class='" + jbasefuncs.GetKindOfFile(file) + "'>"
 		content += "<a href='./file?p=" + folderNr + file + "' id='link" + fmt.Sprint(counter) + "'>" + filepath.Base(file) + "</a></td>\n"
-		content += "<td>" + HumanFilesize(fileSize) + "</td>\n"
+		content += "<td>" + jbasefuncs.HumanFilesize(fileSize) + "</td>\n"
 		content += "<td>" + fmt.Sprint(fi.ModTime().Format("2006-01-02 15:04")) + "</td>\n"
 		content += "</tr>\n"
 		counter++
@@ -316,7 +224,7 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	if folderLocation == "" || jbasefuncs.FileExists(folderLocation) == false {
 		http.Redirect(w, r, "/", 301)
 	}
-	folderContents = scandirFilesFolders(strings.Replace(folderLocation, filepath.Base(folderLocation), "", 1))
+	folderContents = jbasefuncs.ScandirFilesFolders(strings.Replace(folderLocation, filepath.Base(folderLocation), "", 1))
 
 	// Check position of the currently selected file
 	var indexInFolderContents int
@@ -326,17 +234,29 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Start with filling the output varibale (content)
 	content := "<main>\n"
 	content += "<h1>" + filepath.Base(folderLocation) + "</h1>\n"
-	content += getTrailHTML(folderLocation, currentBaseDir, folderNr)
+	content += jhtml.GetTrailHTML(Settings, folderLocation, currentBaseDir, folderNr)
 
-	displayType := getKindOfFile(folderLocation)
+	// Show preview pased on file type of file
+	displayType := jbasefuncs.GetKindOfFile(folderLocation)
 	content += "<div class='preview'>\n"
 	switch {
+	case displayType == "audio":
+		content += jhtml.HtmlAudio("/static/" + r.URL.Query().Get("p"))
 	case displayType == "video":
-		content += ``
+		content += jhtml.HtmlVideo("/static/" + r.URL.Query().Get("p"))
 	case displayType == "image":
 		content += jhtml.HtmlImage("/static/" + r.URL.Query().Get("p"))
+	case displayType == "pdf":
+		content += jhtml.HtmlPdf("/static/" + r.URL.Query().Get("p"))
+	case displayType == "webpage":
+		content += jhtml.HtmlWebPage("/static/" + r.URL.Query().Get("p"))
+	case displayType == "plaintext":
+		content += jhtml.HtmlPlaintext("/static/"+r.URL.Query().Get("p"), folderLocation)
+	case displayType == "code":
+		content += jhtml.HtmlCode("/static/"+r.URL.Query().Get("p"), folderLocation)
 	}
 	content += "</div>\n"
 
@@ -376,10 +296,20 @@ func main() {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])
 	})
 
-	for key, value := range Settings.Folders {
-		http.HandleFunc("/static/"+fmt.Sprint(key)+"/", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println(value + "/" + r.URL.Path[2:])
-			http.ServeFile(w, r, strings.Replace(r.URL.Path, "/static/"+fmt.Sprint(key), value, 1))
+	for _, value := range Settings.Folders {
+		var key string
+		var folder string
+		for i, f := range Settings.Folders {
+			if f == value {
+				key = fmt.Sprint(i)
+				folder = fmt.Sprint(f)
+			}
+		}
+		http.HandleFunc("/static/"+key+"/", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println()
+			fmt.Println("/static/" + key + "/")
+			fmt.Println(strings.Replace(r.URL.Path, "/static/"+key, folder, 1))
+			http.ServeFile(w, r, strings.Replace(r.URL.Path, "/static/"+key, folder, 1))
 		})
 	}
 	http.HandleFunc("/about/", ServeStaticText)

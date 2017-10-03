@@ -1,9 +1,14 @@
 package jhtml
 
 import (
+	"../jbasefuncs"
 	"../jsonfuncs"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 // Returns an HTML string containing the
@@ -43,13 +48,96 @@ func Print_page(w http.ResponseWriter, r *http.Request, content string, id strin
 }
 
 // -------------------------
-// Filetype-specific outputs
+// Functions for printing the path trail.
 // -------------------------
 
-func HtmlImage(src string) string { // HTML output for displaying an image
+// Function to split a filepath into it's folders and return them as an array
+func GetTrail(path string, basePath string) []string {
+	applicablePath := path[len(basePath):]
+	output := strings.Split(applicablePath, "/")
+	return output
+}
+
+// Function to form the trail  in HTML
+func GetTrailHTML(settings jsonfuncs.Settings, folderLocation string, currentBaseDir string, folderNo string) string {
+
+	// Check if the current folderLocation variable leads to a file or folder
+	file, err := os.Stat(folderLocation)
+	jbasefuncs.Check(err)
+	isDir := file.IsDir() // Write to variable to not need to execute function all the time
+
+	folderNoInt, _ := strconv.Atoi(folderNo)                      // Get Int from the folder no.
+	trailelements := GetTrail(folderLocation, currentBaseDir)[1:] // Get elements to loop over
+	trailLink := folderNo                                         // Traillinks needs to be initialized outsize of the loop
+
+	// Start filling output var
+	// The main directory is always linked in the same way
+	output := "<p class='trail'><a href='/' id='link0'>/</a>"
+	output += "<a href='/dir?p=" + folderNo + "' id='link0ctrl'>" + filepath.Base(settings.Folders[folderNoInt]) + "</a>"
+
+	for _, f := range trailelements {
+		trailLink = trailLink + "/" + f
+		switch {
+		// If the current value is the directory above the provided one, add id="goUp"
+		case isDir && len(trailelements) > 1 && f == trailelements[len(trailelements)-2]:
+			output += "<a href='/dir?p=" + trailLink + "' id='goUp'>" + f + "</a>"
+		// If the given filepath leads to a file and this is the dir above it, add id="goUp"
+		case isDir == false && len(trailelements) > 1 && f == trailelements[len(trailelements)-2]:
+			output += "<a href='/dir?p=" + trailLink + "' id='goUp'>" + f + "</a>"
+		// If the given filepath leads to a file, link it as a file
+		case isDir == false && f == trailelements[len(trailelements)-1]:
+			output += "<a href='/file?p=" + trailLink + "'>" + f + "</a>"
+		default:
+			output += "<a href='/dir?p=" + trailLink + "'>" + f + "</a>"
+		}
+	}
+
+	output += "</p>"
+	return output
+}
+
+// -------------------------
+// Filetype-specific outputs
+//
+// Each function takes one or two parameters.
+// Parameter 1 (src) : The path of the publicly displayed source. Needs to be accepted by the client.
+// Parameter 2 (file): The actual filepath of the file. Only needed if some further interaction with the file is necessary.
+// -------------------------
+
+func HtmlAudio(src string) string { // HTML output for displaying an audio file
 	return "<img src='" + src + "' />"
 }
 
-func HtmlWebPage(src string) string { // HTML output for displaying html files in a frame
+func HtmlVideo(src string) string { // HTML output for displaying a video file
+	fileSplit := strings.Split(src, "/")
+	fileType := strings.ToLower(fileSplit[len(fileSplit)-1])
+
+	return `
+        <video controls>
+          <source src="` + src + `" type="video/` + fileType + `">
+          Your browser does not support the video tag.
+        </video> 
+        `
+}
+func HtmlImage(src string) string { // HTML output for displaying an image
 	return "<img src='" + src + "' />"
+}
+func HtmlPdf(src string) string { // HTML output for displaying html files in a frame
+	return "<object data='" + src + "' type='application/pdf'><a href='" + src + "'>PDF file.</a></object>"
+}
+func HtmlWebPage(src string) string { // HTML output for displaying html files in a frame
+	return "<iframe src='" + src + "'></iframe>"
+}
+func HtmlPlaintext(src string, file string) string { // HTML output for displaying plain text files in a frame
+	return "<div class='plaintextPreview'>" + jbasefuncs.File_get_contents(file) + "</div>"
+}
+func HtmlCode(src string, file string) string { // HTML output for displaying code in a frame
+	// For css line numbering, the output needs to be split into single lines
+	fileContent := jbasefuncs.File_get_contents(file)
+	var output string
+	for _, line := range strings.Split(fileContent, "\n") {
+		line = strings.Trim(line, "\r")
+		output += "<span>" + line + "</span>\n"
+	}
+	return "<code>" + output + "</code>"
 }

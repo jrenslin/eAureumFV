@@ -66,7 +66,14 @@ body#file                   {  }
 body#file main h1           { display: block; }
 body#file main p.trail      { display: block; top: 6em; }
 body#file main div.preview  { position: relative; height: calc(100vh - 14em); margin: 0px 0px; padding-top: 6em; background: #111; }
-body#file div.preview > *   { position: absolute; display: block; top: 50%; left: 50%; transform: translate(-50%, -50%); max-height: calc(100% - 2em); }
+body#file div.preview > *   { position: absolute; display: block; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 80vw; max-height: calc(100% - 2em); }
+
+/* The actual previews */
+div.preview > div.plaintextPreview  { overflow-y: auto; white-space: pre-wrap; background: #fff; padding: 0.5em 1em; }
+div.preview > code                  { overflow-y: auto; white-space: pre-wrap; background: #fff; padding: 0.5em 1em; counter-reset: line; }
+div.preview > code > span           { counter-increment: line; position: relative; margin: 0px; padding: 0px 0px 0px 3em; }
+div.preview > code > span:before    { position: absolute; left: 0px; display: inline-block; content: counter(line); width: 2.5em; color: #aaa; background: #e2e2e2;  }
+div.preview > object[type="application/pdf"] { height: 100vh; width: 60vw; }
 
 body#file a[rel="prev"]     { position: absolute; display: inline-block; left: 0px; top: 50%; translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
 body#file a[rel="next"]     { position: absolute; display: inline-block; right: 0px; top: 50%; translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
@@ -75,9 +82,15 @@ a[rel="prev"]:before { display: inline-block; content: " \0025C0 ";  }
 a[rel="next"]:before { display: inline-block; content: " \0025B6 ";  }
 
 /*** Filetype specific classes determine what symbol is to be displayed ***/
-.directory:before { display: inline-block; content: " \01F4C1 "; }
-.image:before     { display: inline-block; content: " \01F5BB "; }
-.webpage:before   { display: inline-block; content: " \01F5BA "; }
+.directory:before   { display: inline-block; content: " \01F4C1 "; }
+.audio:before       { display: inline-block; content: " \01F508 "; }
+.video:before       { display: inline-block; content: " \01F3AC "; }
+.image:before       { display: inline-block; content: " \01F5BB "; }
+.pdf:before         { display: inline-block; content: " \01F4C4 "; }
+.webpage:before     { display: inline-block; content: " \01F5BA "; }
+.plaintext:before   { display: inline-block; content: " \01F5B9 "; }
+.code:before        { display: inline-block; content: " \01F5CD "; }
+.compressed:before  { display: inline-block; content: " \01F5BF "; }
 
 /* Animations */
 /**/
