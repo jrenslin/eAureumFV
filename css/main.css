@@ -1,30 +1,32 @@
-/* Loading Fonts */ 
+/* Loading Fonts */
 @font-face {
     font-family: Quicksand;
     src: url(./Quicksand-Regular.ttf);
 }
 
 html { margin: 0px; padding: 0px; }
-body { margin: 0px; padding: 0px; font-family: Quicksand; font-size: 1.25em; background: #fff; }
+body { margin: 0px; padding: 0px; font-family: Quicksand; font-size: 1.25em; background: #fff; z-index: 10; }
 
 /*** General ***/
 /* Side-structure elements */
-main         { background: #fff; padding: 0px 0px 1em 0px; }
+main         { background: #fff; padding: 0px 0px 1em 0px; z-index: 10; }
 section      { background: #fff; padding: 1em 0px; }
 main > *     { padding: 0px 10vw; }
 section:not(section.fullpage) > *  { padding: 0px 10vw; }
 
 /* Specific text elements */
-h1      { display: block; margin: 0px; padding: 0.7em 10vw; background: #fff; color: #888; }
-a       { text-decoration: none; color:#888; }
-a:hover { animation: linkChangeColor 0.5s; background: #888; color: #fff; }
+h1        { display: block; margin: 0px; padding: 0.7em 10vw; background: #fff; color: #888; z-index: 10; }
+a         { text-decoration: none; color:#888; }
+a:hover   { animation: linkChangeColor 0.5s; background: #888; color: #fff; }
 
 /* Forms */
-label      { display: block; color: #888; font-weight: bold; }
-input      { width: 20em; margin: 0.5em 0px; padding: 5px; border: 3px solid #ddd; border-radius: 5px; font-weight: bold; }
-textarea   { width: 23em; margin: 0.5em 0px; padding: 5px; border: 3px solid #ddd; border-radius: 5px; }
-button     { display: block; padding: 0.7em 1.2em; border: 3px solid #ddd; border-radius: 5px; color: #888; font-size: 0.9em; }
-button:hover { animation: buttonChangeColor 0.5s; color: #fff; background: #888; }
+label         { display: block; color: #888; font-weight: bold; }
+input         { width: 20em; margin: 0.5em 0px; padding: 5px; border: 3px solid #ddd; border-radius: 5px;
+                font-weight: bold; }
+textarea      { width: 23em; margin: 0.5em 0px; padding: 5px; border: 3px solid #ddd; border-radius: 5px; }
+button        { display: block; padding: 0.7em 1.2em; border: 3px solid #ddd; border-radius: 5px; color: #888;
+                font-size: 0.9em; }
+button:hover  { animation: buttonChangeColor 0.5s; color: #fff; background: #888; }
 
 /* Tables */
 table                { width: 80vw; margin:1.5em 10vw; padding: 0px; border-collapse: collapse; }
@@ -35,7 +37,8 @@ table tr > td        { padding: 0.5em 0px; text-align: left; color: #888; }
 table tr > td:before { position: absolute; top: 50%; transform: translate(0px, -50%); right: calc(100% + 1em); }
 
 /*** Generally used, specific elements ***/
-a.buttonlike       { display: inline-block; width: auto; padding: 0.7em 1.2em; border: 3px solid #ddd; border-radius: 5px; 0.9em; }
+a.buttonlike       { display: inline-block; width: auto; padding: 0.7em 1.2em; border: 3px solid #ddd;
+                     border-radius: 5px; font-size: 0.9em; }
 a.buttonlike:hover { animation: buttonChangeColor 0.5s; color: #fff; background: #888; }
 p.note             { display: block; font-size: 0.8em; margin: 0.5em 0px; padding: 0px 0px; }
 
@@ -48,8 +51,9 @@ p.trail a:first-child:before  { display: none; }
 /*** Tiles ***/
 ul.tiles               { display: block; margin-left: -1em; padding: 1em 10vw; }
 ul.tiles li            { display: inline-block; }
-ul.tiles li a          { display: inline-block; margin: 1em; padding: 1em; text-align: center; color: #888; border: 2px solid #ddd; border-radius: 5px; }
-ul.tiles li a:hover    { animation: ; color: #fff; }
+ul.tiles li a          { display: inline-block; margin: 1em; padding: 1em; text-align: center;
+                         color: #888; border: 2px solid #ddd; border-radius: 5px; }
+ul.tiles li a:hover    { animation: linkChangeColor 0.5s; color: #fff; }
 ul.tiles li a:before   { display: block; margin-bottom: 0.2em; font-size: 4em; padding: 0px 0.5em; }
 
 /*** Fullpage: Pages that display text only and are centered. E.g. the setup page. ***/
@@ -60,24 +64,51 @@ section.fullpage h1 { padding-left: 0px; }
 section#page1, section#page2, section#page3, section#page4, section#page5 { display: none; }
 section:target#page1, section:target#page2, section:target#page3, section:target#page4, section:target#page5 { display: block; animation: fade-in 0.8s; }
 
+/*** Paged images (e.g. used with the cbz viewer) ***/
+img#page0, img#page1, img#page2, img#page3, img#page4, img#page5, img#page6, img#page7, img#page8, img#page9, img#page10 { display: none; }
+img:target#page0, img:target#page1, img:target#page2, img:target#page3, img:target#page4, img:target#page5, img:target#page6, img:target#page7, img:target#page8, img:target#page9, img:target#page10 { display: block; animation: fade-in 0.8s; }
+
 /*** Specific pages ***/
 /* File preview page */
 body#file                   {  }
 body#file main h1           { display: block; }
 body#file main p.trail      { display: block; top: 6em; }
-body#file main div.preview  { position: relative; height: calc(100vh - 14em); margin: 0px 0px; padding-top: 6em; background: #111; }
-body#file div.preview > *   { position: absolute; display: block; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 80vw; max-height: calc(100% - 2em); }
+body#file main div.preview  { position: relative; height: calc(100vh - 14em); margin: 0px 0px; padding-top: 6em;
+                              background: #111; }
+div.preview > *             { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                              max-width: 80vw; max-height: calc(100% - 2em); }
+body#file main div.preview.fullsized { position: fixed; display: block; top: 0px; height: 100vh; width: 80vw;
+                                       padding-top: 0px; z-index: 12; }
 
 /* The actual previews */
-div.preview > audio                 { padding: 1em; background: #fff; border: 4px solid #ddd; }
-div.preview > div.plaintextPreview  { overflow-y: auto; white-space: pre-wrap; background: #fff; padding: 0.5em 1em; }
-div.preview > code                  { overflow-y: auto; white-space: pre-wrap; background: #fff; padding: 0.5em 1em; counter-reset: line; }
+div.preview > audio                 { display: block; padding: 1em; background: #fff; border: 4px solid #ddd; }
+div.preview > div.plaintextPreview  { display: block; overflow-y: auto; white-space: pre-wrap; background: #fff;
+                                      padding: 0.5em 1em; }
+div.preview > code                  { display: block; overflow-y: auto; white-space: pre-wrap; background: #fff;
+                                      padding: 0.5em 1em; counter-reset: line; }
 div.preview > code > span           { counter-increment: line; position: relative; margin: 0px; padding: 0px 0px 0px 3em; }
-div.preview > code > span:before    { position: absolute; left: 0px; display: inline-block; content: counter(line); width: 2.5em; color: #aaa; background: #e2e2e2;  }
-div.preview > object[type="application/pdf"] { height: 100vh; width: 60vw; }
+div.preview > code > span:before    { position: absolute; left: 0px; display: inline-block;
+                                      content: counter(line); width: 2.5em; color: #aaa; background: #e2e2e2;  }
+div.preview > object[type="application/pdf"] { display: block; height: 100vh; width: 60vw; }
 
-body#file a[rel="prev"]     { position: absolute; display: inline-block; left: 0px; top: 50%; translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
-body#file a[rel="next"]     { position: absolute; display: inline-block; right: 0px; top: 50%; translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
+/* Info box */
+div.preview > div.infoBox              { position:absolute; top: 0.5em; left: initial; right: 1em;
+                                         transform: initial; text-align: right; z-index: 10; }
+div.preview > div.infoBox:before       { content: " \01F6C8 "; display: inline-block; background: #aaa;
+                                         padding:0.3em 0.5em 0.4em 0.5em; border-radius: 2em; z-index: 11; }
+div.preview > div.infoBox > div        { display: none; z-index: 9; }
+div.preview > div.infoBox:hover > div  { animation: fade-in 0.5s; display: block; margin-top:-1em;
+                                         padding: 1em; background: #aaa;  text-align: left; }
+p.offsetswitchers                      { display: flex; }
+p.offsetswitchers a                    { flex: 1; }
+p.offsetswitchers a:last-child         { text-align: right; }
+p.offsetswitchers a:hover              { animation: initial; }
+
+/* Links for previous / next page */
+body#file a[rel="prev"]     { position: absolute; display: inline-block; left: 0px; top: 50%;
+                              translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
+body#file a[rel="next"]     { position: absolute; display: inline-block; right: 0px; top: 50%;
+                              translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
 
 a[rel="prev"]:before { display: inline-block; content: " \0025C0 ";  }
 a[rel="next"]:before { display: inline-block; content: " \0025B6 ";  }
@@ -87,11 +118,12 @@ a[rel="next"]:before { display: inline-block; content: " \0025B6 ";  }
 .audio:before       { display: inline-block; content: " \01F508 "; }
 .video:before       { display: inline-block; content: " \01F3AC "; }
 .image:before       { display: inline-block; content: " \01F5BB "; }
-.pdf:before         { display: inline-block; content: " \01F4C4 "; }
+.pdf:before         { display: inline-block; content: " \01F4D3 "; }
 .webpage:before     { display: inline-block; content: " \01F5BA "; }
 .plaintext:before   { display: inline-block; content: " \01F5B9 "; }
 .code:before        { display: inline-block; content: " \01F5CD "; }
 .compressed:before  { display: inline-block; content: " \01F5BF "; }
+.comic:before       { display: inline-block; content: " \01F4D2 "; }
 
 /* Animations */
 /**/

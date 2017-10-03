@@ -54,6 +54,21 @@ function hotkeys (e) {
         break;
     }
 
+    if (document.getElementById("file") != null) { // Only for use on the file / preview page
+        if (e.ctrlKey) {
+            switch (e.keyCode) {
+            case 40:
+                if (String(window.location.search).search("fullPreview") < 1) {
+                    target = String(window.location).replace(window.location.search, window.location.search + "&fullPreview=yes");
+                } else {
+                    target = String(window.location).replace("&fullPreview=yes", "");
+                }
+                window.location.replace(target);
+            }
+        } 
+    }
+    
+
     // Bind cursor keys (only with CTRL pressed)
     if (e.ctrlKey) {
         switch (e.keyCode) {
@@ -68,4 +83,40 @@ function hotkeys (e) {
             break;
         }
     }
+    // Bind cursor keys (without CTRL) for CBZ viewer
+    else if (document.getElementById("page0") != null) { // this only applies if we have a paged site
+        // Get number of the current page from anchor
+		    var no = parseInt(window.location.hash.slice(-1));
+        var offset = window.location.search.split("&")[1].split("=")[1];
+
+        switch (e.keyCode) {
+        case 37:
+        case 38:
+            if (no > 0) {
+                window.location.hash = "#page" + (no - 1);
+            } else if (document.getElementById("prevBatch") != null) {
+                // Currently offset is always the second parameter.
+                var target = "";
+                target = String(window.location).replace("offset=" + offset, "offset=" + (parseInt(offset) - 10)).split("#")[0];
+                target = target + "#page9";
+                window.location.replace(target);
+            }
+            break;
+
+        case 39:
+        case 40:
+            if (parseInt(offset) + parseInt(no) == parseInt(document.getElementById("max").innerHTML) - 1) break;
+            if (no < 9) {
+                window.location.hash = "#page" + (no + 1);
+            } else if (document.getElementById("nextBatch") != null) {
+                // Currently offset is always the second parameter.
+                var target = String(window.location).replace("offset=" + offset, "offset=" + (parseInt(offset) + 10)).split("#")[0];
+                target = target + "#page0";
+                window.location.replace(target);
+            }
+            break;
+        }
+
+    }
 };
+

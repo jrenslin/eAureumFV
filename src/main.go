@@ -4,6 +4,8 @@ import (
 	"./jbasefuncs"
 	"./jhtml"
 	"./jsonfuncs"
+	"archive/zip"
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +19,7 @@ import (
 const baseLocation = "../"
 const defaultPort = "9090"
 const timeFormat = "[2006-01-02 15:04:05] "
+const localOutputFormat = "%20s %-20s %20s \n"
 
 var Settings jsonfuncs.Settings
 
@@ -43,9 +46,10 @@ func ensure_working_environment(folder string) {
 
 func ServeStaticText(w http.ResponseWriter, r *http.Request) {
 	path := strings.Trim(r.URL.Path[1:], "/")
-	content := `<nav>` + jsonfuncs.Get_navigation("../data", "../data/navigation.json") + `</nav>
+	content := `
+        <nav>` + jsonfuncs.Get_navigation("../data", "../data/navigation.json") + `</nav>
 
-<main>` + jbasefuncs.File_get_contents("../data/"+path+".htm") + "</main>"
+        <main>` + jbasefuncs.File_get_contents("../data/"+path+".htm") + "</main>"
 	jhtml.Print_page(w, r, content, path, jhtml.Get_metatags("Tickets", "icon", "description", "keywords"))
 }
 
@@ -53,31 +57,31 @@ func ServeStaticText(w http.ResponseWriter, r *http.Request) {
 func serveSetup(w http.ResponseWriter, r *http.Request) {
 
 	content := `
-<section class="fullpage" id="page1">
-  <h1>Welcome</h1>
-  <p>This is just a little page I wrote to learn web programming in Go.</p>
-  <a class='buttonlike' href="#page2">Next: Setup</a>
-</section>
+        <section class="fullpage" id="page1">
+          <h1>Welcome</h1>
+          <p>This is just a little page I wrote to learn web programming in Go.</p>
+          <a class='buttonlike' href="#page2">Next: Setup</a>
+        </section>
 
-<section class="fullpage" id="page2">
-  <h2>Setup</h2>
-  <p>First, some settings need to be done.</p>
-  <form action="storeSettings" method="POST">
-    <label for="port">Port</label>
-    <input type="number" name="port" id="port" value="` + Settings.Port + `" />
-    <label for="folders">Folders to serve</label>
-    <textarea name="folders" id="folders" placeholder="Put one folder path per line."></textarea>
-    <button type="submit">Submit</button>
-  </form>
-</section>
+        <section class="fullpage" id="page2">
+          <h2>Setup</h2>
+          <p>First, some settings need to be done.</p>
+          <form action="storeSettings" method="POST">
+            <label for="port">Port</label>
+            <input type="number" name="port" id="port" value="` + Settings.Port + `" />
+            <label for="folders">Folders to serve</label>
+            <textarea name="folders" id="folders" placeholder="Put one folder path per line."></textarea>
+            <button type="submit">Submit</button>
+          </form>
+        </section>
 
-<script>
-  if(!window.location.hash) {
-    window.location.href = "./#page1";
-  }
-</script>
+        <script>
+          if(!window.location.hash) {
+            window.location.href = "./#page1";
+          }
+        </script>
         `
-	fmt.Println(time.Now().Format(timeFormat) + "Setup")
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Starting setup", "")
 	jhtml.Print_page(w, r, content, "setup", jhtml.Get_metatags("Setup", "icon", "description", "keywords"))
 
 }
@@ -104,7 +108,7 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 
 	Settings.Port = port
 	Settings.Folders = folders
-	fmt.Println(time.Now().Format(timeFormat) + "Storing settings")
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Storing settings", "")
 
 	jbasefuncs.File_put_contents(baseLocation+"json/settings.json", jsonfuncs.ToJson(Settings))
 	http.Redirect(w, r, "/", 301)
@@ -121,13 +125,15 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 		serveSetup(w, r)
 		return // Stop function execution if the setup runs
 	}
+
+	// Start filling output variable (content)
 	content := "<main>\n"
 
 	content += "<h1>A File Server</h1>\n"
 	content += "<p class='trail'><a href='/' id='link0'>/</a></p>\n"
 
 	content += "<ul class='tiles'>\n"
-	for folderNr, folder := range Settings.Folders {
+	for folderNr, folder := range Settings.Folders { // Loop over folders and list them up
 		content += "<li>\n"
 		content += "<a class='directory' id='link" + fmt.Sprint(folderNr+1) + "' href='/dir?p=" + fmt.Sprint(folderNr) + "'>" + filepath.Base(folder) + "</a>\n"
 		content += "</li>\n"
@@ -202,7 +208,7 @@ func serveDirectory(w http.ResponseWriter, r *http.Request) {
 
 	content += "</main>"
 
-	fmt.Println(time.Now().Format(timeFormat) + "Serving table: " + folderLocation)
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving table: ", folderLocation)
 	jhtml.Print_page(w, r, content, "directoryTable", jhtml.Get_metatags("Directory: "+filepath.Base(folderLocation), "icon", "description", "keywords"))
 
 }
@@ -241,7 +247,16 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 
 	// Show preview pased on file type of file
 	displayType := jbasefuncs.GetKindOfFile(folderLocation)
-	content += "<div class='preview'>\n"
+
+	// Offer option to show preview in full
+	fullSized := r.URL.Query().Get("fullPreview")
+	switch {
+	case fullSized != "":
+		content += "<div class='preview fullsized'>\n"
+	default:
+		content += "<div class='preview'>\n"
+	}
+
 	switch {
 	case displayType == "audio":
 		content += jhtml.HtmlAudio("/static/" + r.URL.Query().Get("p"))
@@ -257,6 +272,53 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		content += jhtml.HtmlPlaintext("/static/"+r.URL.Query().Get("p"), folderLocation)
 	case displayType == "code":
 		content += jhtml.HtmlCode("/static/"+r.URL.Query().Get("p"), folderLocation)
+	case displayType == "comic":
+
+		offsetStr := r.URL.Query().Get("offset")
+		if offsetStr == "" {
+			offsetStr = "0"
+		}
+		offset, err := strconv.Atoi(offsetStr)
+		if err != nil {
+			fmt.Fprintf(w, "Invalid offset")
+			return
+		}
+
+		archiveContents := listZipContents(folderLocation)
+		archiveLocation := r.URL.Query().Get("p")
+		for i, _ := range archiveContents {
+			switch {
+			case i < offset:
+				continue
+			case i > offset+10:
+				continue
+			}
+			content += "<img src='/zip?p=" + archiveLocation + "&f=" + fmt.Sprint(i) + "' id='page" + fmt.Sprint(i-offset) + "'/>\n"
+		}
+
+		content += "<div class='infoBox'><div>\n" // Begin of info box
+		content += "<p><span id='current'>0</span> / <span id='max'>" + fmt.Sprint(len(archiveContents)) + "</span></p>\n"
+
+		content += "<p class='offsetswitchers'>\n"
+		// Print options to switch to next or previous batch / change offset
+		if offset >= 10 {
+			content += "<a class='offsetswitcher' href='/file?p=" + r.URL.Query().Get("p") + "&offset=" + fmt.Sprint(offset-10) + "' id='prevBatch' >" + fmt.Sprint(offset-10) + "</a>\n"
+		}
+		if offset+10 < len(archiveContents) {
+			content += "<a class='offsetswitcher' href='/file?p=" + r.URL.Query().Get("p") + "&offset=" + fmt.Sprint(offset+10) + "' id='nextBatch' >" + fmt.Sprint(offset+10) + "</a>\n"
+		}
+		content += "</p>\n"
+		content += "</div></div>\n"
+
+		// Add javascript to show first image if no hash is set
+		content += `
+	  	<script>
+		if(!window.location.hash) {
+			window.location.href = "./file?p=` + r.URL.Query().Get("p") + `&offset=` + fmt.Sprint(offset) + `#page0";
+		}
+		</script>
+		`
+
 	}
 	content += "</div>\n"
 
@@ -274,20 +336,79 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 
 	content += "</main>\n"
 
-	fmt.Println(time.Now().Format(timeFormat) + "Serving file: " + folderLocation)
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving file: ", folderLocation)
 	jhtml.Print_page(w, r, content, "file", jhtml.Get_metatags("File: "+filepath.Base(folderLocation), "icon", "description", "keywords"))
+
+}
+
+// Returns a list of all the file names of files within a ZIP
+func listZipContents(file string) []string {
+	var output []string
+
+	z, err := zip.OpenReader(file)
+	jbasefuncs.Check(err)
+	defer z.Close()
+
+	for _, f := range z.File {
+		output = append(output, f.Name)
+	}
+
+	return output
+}
+
+// Serve files from within ZIP-compressed files
+// TODO Test this with ZIPs containing folders
+func serveZipContents(w http.ResponseWriter, r *http.Request) {
+
+	zipLocation := r.URL.Query().Get("p")
+	fileNoStr := r.URL.Query().Get("f") // The number of the file within the ZIP file
+
+	fileNo, err := strconv.Atoi(fileNoStr)
+	if err != nil {
+		fileNo = 0
+	}
+
+	// Replace the beginning of the filepath passed via GET
+	folderNr := strings.Split(zipLocation, "/")[0]
+	folderNrInt, err := strconv.Atoi(folderNr)
+	jbasefuncs.Check(err)
+	currentBaseDir := Settings.Folders[folderNrInt]
+	zipLocation = strings.Replace(zipLocation, folderNr, currentBaseDir, 1)
+
+	switch {
+	case fileNo < 0:
+		fileNo = 0
+	case fileNo > len(listZipContents(zipLocation)):
+		fileNo = jbasefuncs.Max([]int{len(listZipContents(zipLocation)) - 1, 0})
+	}
+
+	z, err := zip.OpenReader(zipLocation)
+	jbasefuncs.Check(err)
+	defer z.Close()
+
+	f := z.File[fileNo]
+
+	rc, err := f.Open()
+	jbasefuncs.Check(err)
+
+	buffer := new(bytes.Buffer)
+	buffer.ReadFrom(rc)
+
+	w.Write(buffer.Bytes()) // Send start of structure and metatags
+	rc.Close()
 
 }
 
 func main() {
 
-	fmt.Println(time.Now().Format(timeFormat) + "Starting ... ")
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Starting ... ", "")
 	ensure_working_environment(baseLocation)
 	Settings = jsonfuncs.DecodeSettings(baseLocation + "json/settings.json")
 
 	http.HandleFunc("/", serveStartPage)                  // Serve startpage on
 	http.HandleFunc("/dir", serveDirectory)               // Serve directories on
 	http.HandleFunc("/file", serveFile)                   // Serve page for specific files
+	http.HandleFunc("/zip", serveZipContents)             // Serve a file out of a zip file
 	http.HandleFunc("/storeSettings", serveStoreSettings) // Serve page for storing settings (atm restricted for initial setup)
 	http.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])
