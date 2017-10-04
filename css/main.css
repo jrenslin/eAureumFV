@@ -56,6 +56,16 @@ ul.tiles li a          { display: inline-block; margin: 1em; padding: 1em; text-
 ul.tiles li a:hover    { animation: linkChangeColor 0.5s; color: #fff; }
 ul.tiles li a:before   { display: block; margin-bottom: 0.2em; font-size: 4em; padding: 0px 0.5em; }
 
+/* Tiled sections */
+div.tiled > div             { display: block; min-height: 40vh; border: 2px solid #ddd; border-radius: 0.3em; }
+div.tiled dl                { margin-top: 0px; padding-top: 0px; }
+@media (min-width:65em) {
+    div.tiled                          { display: flex; flex-wrap: wrap; }
+    div.tiled > div                    { display: inline-block; flex: 1; padding: 1em; min-width: 45%;
+                                        border: 2px solid #ddd; border-radius: 0.3em; }
+    div.tiled > div:nth-child(2n - 1)  { margin-right: 2em; }
+}
+
 /*** Fullpage: Pages that display text only and are centered. E.g. the setup page. ***/
 section.fullpage    { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: calc(800px + 20vw); }
 section.fullpage h1 { padding-left: 0px; }
@@ -112,8 +122,20 @@ body#file a[rel="prev"]     { position: absolute; display: inline-block; left: 0
 body#file a[rel="next"]     { position: absolute; display: inline-block; right: 0px; top: 50%;
                               translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
 
-a[rel="prev"]:before { display: inline-block; content: " \0025C0 ";  }
-a[rel="next"]:before { display: inline-block; content: " \0025B6 ";  }
+a[rel="prev"]:before        { display: inline-block; content: " \0025C0 ";  }
+a[rel="next"]:before        { display: inline-block; content: " \0025B6 ";  }
+
+/*** Charts ***/
+div.barChart         { display: flex !important; width: auto; height: calc(100% - 1.5em); border-bottom: 2px solid #ddd; }
+div.barChart a       { position: relative; display: inline-block; flex: 1; height: 100%; vertical-align: bottom; }
+div.barChart a:hover { animation: initial; background: initial; }
+
+div.barChart a > span                   { position: absolute; left: 50%; transform: translate(-50%, 0px); color: #888; }
+div.barChart a > span:first-child       { display: block; position: absolute; bottom: 0px; width: 100%; background: #555;
+                                          opacity: 0.4; font-size: 0.8em; }
+div.barChart a:hover > span:first-child { animation: fade-in 0.5s; opacity: 1; }
+div.barChart a > span:last-child        { top: calc(100% + 0.4em); font-size: 0.7em; }
+
 
 /*** Filetype specific classes determine what symbol is to be displayed ***/
 .directory:before   { display: inline-block; content: " \01F4C1 "; }
@@ -149,4 +171,3 @@ a[rel="next"]:before { display: inline-block; content: " \0025B6 ";  }
     from { background: #fff; }
     to   { background: #eee; }
 }
-

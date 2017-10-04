@@ -233,20 +233,20 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 
 	`
 
-	content += "<div class='barChart'>"
+	content += "<div>\n<div class='barChart'>\n"
 	total := 0
 	for _, files := range FilesByType {
 		total += len(files)
 	}
 
 	for name, files := range FilesByType {
-		content += "<div><span class='' style='height: " + fmt.Sprint(float64(100)/float64(total)*float64(len(files))) + "%;'></span>"
-		content += "<span>" + fmt.Sprint(len(files)) + "</span><span>" + strings.Title(name) + "</span>"
-		content += "</div>"
+		content += "<a><span class='' style='height: " + strconv.FormatFloat(float64(100)/float64(total)*float64(len(files)), 'f', 3, 64) + "%%;'></span>\n"
+		content += "<span>" + fmt.Sprint(len(files)) + "</span><span>" + strings.Title(name) + "</span>\n"
+		content += "</a>\n"
 	}
-	content += "</div>"
+	content += "</div>\n</div>\n"
 
-	content += "</div>"
+	content += "</div>\n"
 	content += "</section>\n"
 
 	jhtml.Print_page(w, r, content, "startPage", jhtml.Get_metatags("Start page", "icon", "description", "keywords"))
