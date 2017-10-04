@@ -1,13 +1,13 @@
-/* Bind keybindings to body. */
+/* Bind keys to body. */
 if (document.getElementsByTagName('body')[0] != null) {
     document.getElementsByTagName('body')[0].addEventListener('keydown', hotkeys);
 }
 
-/* Function for referring */
+/* Function for referring based on a link in the page */
 function replaceWindow (id) {
-    var link = document.getElementById(id).href;
+    var link = document.getElementById(id);
     if (link != null) {
-        window.location.replace(link);
+        window.location.href = link.href;
     }
 }
 
@@ -63,11 +63,10 @@ function hotkeys (e) {
                 } else {
                     target = String(window.location).replace("&fullPreview=yes", "");
                 }
-                window.location.replace(target);
+                window.location.href = target;
             }
-        } 
+        }
     }
-    
 
     // Bind cursor keys (only with CTRL pressed)
     if (e.ctrlKey) {
@@ -99,7 +98,7 @@ function hotkeys (e) {
                 var target = "";
                 target = String(window.location).replace("offset=" + offset, "offset=" + (parseInt(offset) - 10)).split("#")[0];
                 target = target + "#page9";
-                window.location.replace(target);
+                window.location.href = target;
             }
             break;
 
@@ -112,7 +111,7 @@ function hotkeys (e) {
                 // Currently offset is always the second parameter.
                 var target = String(window.location).replace("offset=" + offset, "offset=" + (parseInt(offset) + 10)).split("#")[0];
                 target = target + "#page0";
-                window.location.replace(target);
+                window.location.href = target;
             }
             break;
         }
