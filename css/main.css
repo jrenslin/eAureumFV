@@ -9,10 +9,10 @@ body { margin: 0px; padding: 0px; font-family: Quicksand; font-size: 1.25em; bac
 
 /*** General ***/
 /* Side-structure elements */
-main         { background: #fff; padding: 0px 0px 1em 0px; z-index: 10; }
-section      { background: #fff; padding: 1em 0px; }
+main         { background: #fff; padding: 0px 0px 1em 0px; z-index: 10; min-height:calc(100vh - 1em); }
+section      { background: #fff; padding: 1em 10vw; min-height:calc(100vh - 2em); }
 main > *     { padding: 0px 10vw; }
-section:not(section.fullpage) > *  { padding: 0px 10vw; }
+main + section { border-top: 2px solid #ddd; }
 
 /* Specific text elements */
 h1        { display: block; margin: 0px; padding: 0.7em 10vw; background: #fff; color: #888; z-index: 10; }
@@ -57,7 +57,7 @@ ul.tiles li a:hover    { animation: linkChangeColor 0.5s; color: #fff; }
 ul.tiles li a:before   { display: block; margin-bottom: 0.2em; font-size: 4em; padding: 0px 0.5em; }
 
 /*** Fullpage: Pages that display text only and are centered. E.g. the setup page. ***/
-section.fullpage    { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: 800px; }
+section.fullpage    { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: calc(800px + 20vw); }
 section.fullpage h1 { padding-left: 0px; }
 
 /*** Paged sections ***/
@@ -91,7 +91,7 @@ div.preview > code > span:before    { position: absolute; left: 0px; display: in
                                       content: counter(line); width: 2.5em; color: #aaa; background: #e2e2e2;  }
 div.preview > object[type="application/pdf"] { display: block; height: 100vh; width: 60vw; }
 
-/* Info box */
+/*** Info box ***/
 div.preview > div.infoBox              { position:absolute; top: 0.5em; left: initial; right: 1em;
                                          transform: initial; text-align: right; z-index: 10; }
 div.preview > div.infoBox:before       { content: " \01F6C8 "; display: inline-block; background: #aaa;
@@ -99,6 +99,8 @@ div.preview > div.infoBox:before       { content: " \01F6C8 "; display: inline-b
 div.preview > div.infoBox > div        { display: none; z-index: 9; }
 div.preview > div.infoBox:hover > div  { animation: fade-in 0.5s; display: block; margin-top:-1em;
                                          padding: 1em; background: #aaa;  text-align: left; }
+
+/* Buttons for changing the offset in CBZ viewer */
 p.offsetswitchers                      { display: flex; }
 p.offsetswitchers a                    { flex: 1; }
 p.offsetswitchers a:last-child         { text-align: right; }

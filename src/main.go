@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -32,6 +33,8 @@ const localOutputFormat = "%20s %-20s %20s \n" // Determines output in terminal 
 
 // Initialize settings as a global variable.
 var Settings jsonfuncs.Settings
+var FileIndex []string
+var FilesByType = make(map[string][]string)
 
 // Function to check if the list of folders to be served is empty.
 // If no, this means that the setup should/can be run.
@@ -65,6 +68,61 @@ func ServeStaticText(w http.ResponseWriter, r *http.Request) {
 
         <main>` + jbasefuncs.File_get_contents("../data/"+path+".htm") + "</main>"
 	jhtml.Print_page(w, r, content, path, jhtml.Get_metatags("Page", "icon", "description", "keywords"))
+}
+
+func scandirRecursive(filepath string) []string {
+	var output []string
+	folderContents := jbasefuncs.ScandirFilesFolders(filepath)
+	for _, folder := range folderContents["folders"] {
+		filesInSubdirectory := scandirRecursive(folder)
+		output = append(output, filesInSubdirectory...)
+	}
+	output = append(output, folderContents["files"]...)
+	return output
+}
+
+// Creates index of all files by running scandirRecursive over each folder specified in the settings
+func indexAllFiles() []string {
+
+	var output []string
+	for _, i := range Settings.Folders {
+		output = append(output, scandirRecursive(i)...)
+	}
+
+	return output
+}
+
+// Returns all files
+func searchIndexForFileExtensions(extensions []string) []string {
+	var output []string
+	for _, extension := range extensions {
+		r := regexp.MustCompile(extension + `$`)
+		for _, file := range FileIndex {
+			if r.MatchString(file) {
+				output = append(output, file)
+			}
+		}
+	}
+	return output
+}
+
+// Returns a list of all the file names of files within a ZIP
+func listZipContents(file string) []string {
+
+	var output []string
+
+	z, err := zip.OpenReader(file)
+	// Return empty string if an error occured when opening the ZIP
+	if err != nil {
+		return []string{}
+	}
+	defer z.Close()
+
+	for _, f := range z.File {
+		output = append(output, f.Name) // Add every file name to output
+	}
+
+	return output
 }
 
 // Prints the welcome and setup page
@@ -161,6 +219,36 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 	content += "</ul>\n"
 
 	content += "</main>\n"
+
+	// Show some statistics
+	content += "<section>\n"
+	content += "<h2>Numbers</h2>\n"
+	content += "<div class='tiled'>"
+
+	content += `<div>
+	<dl>
+	  <dt>Number of all files</dt><dd>` + fmt.Sprint(len(FileIndex)) + `</dd>
+	</dl>
+	</div>
+
+	`
+
+	content += "<div class='barChart'>"
+	total := 0
+	for _, files := range FilesByType {
+		total += len(files)
+	}
+
+	for name, files := range FilesByType {
+		content += "<div><span class='' style='height: " + fmt.Sprint(float64(100)/float64(total)*float64(len(files))) + "%;'></span>"
+		content += "<span>" + fmt.Sprint(len(files)) + "</span><span>" + strings.Title(name) + "</span>"
+		content += "</div>"
+	}
+	content += "</div>"
+
+	content += "</div>"
+	content += "</section>\n"
+
 	jhtml.Print_page(w, r, content, "startPage", jhtml.Get_metatags("Start page", "icon", "description", "keywords"))
 }
 
@@ -373,25 +461,6 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Returns a list of all the file names of files within a ZIP
-func listZipContents(file string) []string {
-
-	var output []string
-
-	z, err := zip.OpenReader(file)
-	// Return empty string if an error occured when opening the ZIP
-	if err != nil {
-		return []string{}
-	}
-	defer z.Close()
-
-	for _, f := range z.File {
-		output = append(output, f.Name) // Add every file name to output
-	}
-
-	return output
-}
-
 // Serve files from within ZIP-compressed files
 // TODO Test this with ZIPs containing folders
 func serveZipContents(w http.ResponseWriter, r *http.Request) {
@@ -443,12 +512,25 @@ func serveZipContents(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func init() {
+
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Initializing ... ", "")
+
+	ensure_working_environment(baseLocation)
+	Settings = jsonfuncs.DecodeSettings(baseLocation + "json/settings.json") // Settings
+	FileIndex = indexAllFiles()                                              // Load index of all files
+
+	for name, extensions := range jbasefuncs.FileTypes {
+		FilesByType[name] = searchIndexForFileExtensions(extensions)
+	}
+
+}
+
 func main() {
 
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Starting ... ", "")
-	ensure_working_environment(baseLocation)
-	Settings = jsonfuncs.DecodeSettings(baseLocation + "json/settings.json")
 
+	// Bind callable URLs
 	http.HandleFunc("/", serveStartPage)                  // Serve startpage
 	http.HandleFunc("/dir", serveDirectory)               // Serve directory table
 	http.HandleFunc("/file", serveFile)                   // Serve page for specific files
@@ -460,6 +542,7 @@ func main() {
 	http.HandleFunc("/js/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])
 	})
+	http.HandleFunc("/about/", ServeStaticText)
 
 	// Serve folders specified in the settings
 	for _, value := range Settings.Folders {
@@ -472,13 +555,13 @@ func main() {
 			}
 		}
 		http.HandleFunc("/static/"+key+"/", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println()
 			fmt.Println(strings.Replace(r.URL.Path, "/static/"+key, folder, 1))
 			http.ServeFile(w, r, strings.Replace(r.URL.Path, "/static/"+key, folder, 1))
 		})
 	}
-	http.HandleFunc("/about/", ServeStaticText)
-	err := http.ListenAndServe(":"+Settings.Port, nil) // Set listen port
+
+	// Set port to listen on
+	err := http.ListenAndServe(":"+Settings.Port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
