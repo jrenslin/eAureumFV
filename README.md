@@ -21,7 +21,7 @@ cd <link>/src
 go build && ./src
 ```
 
-Next, connect to localhost on port `9090`, the default port. 
+Next, connect to `localhost` on port `9090`, the default port. 
 
 A setup page is triggered. Here you can set the port eAureumFV listens on and the folders it serves. 
 
