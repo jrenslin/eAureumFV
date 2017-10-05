@@ -54,5 +54,10 @@
         "name": "Keybindings",
         "link": "/cheatSheet",
         "sub": null
+    },
+    {
+        "name": "Search",
+        "link": "",
+        "sub": null
     }
 ]

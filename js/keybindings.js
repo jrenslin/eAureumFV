@@ -52,6 +52,16 @@ function hotkeys (e) {
     case 57:
         replaceWindow("link9");
         break;
+    case 63:
+        replaceWindow("/cheatSheet");
+        break;
+    case 77:
+        if (e.ctrlKey) {
+            console.log("Pressed CTRL+M, displaying search.");
+            document.getElementById('search').style = "";
+            document.getElementById('searchInput').focus();
+            break;
+        }
     }
 
     if (document.getElementById("file") != null) { // Only for use on the file / preview page

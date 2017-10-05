@@ -760,6 +760,28 @@ func serveZipContents(w http.ResponseWriter, r *http.Request) {
 }
 
 // -----------------------
+// Serves index of all files in json
+// -----------------------
+
+func serveFileIndex(w http.ResponseWriter, r *http.Request) {
+	var output []string
+
+	w.Header().Set("Content-Type", "application/json")
+	for _, file := range FileIndex {
+		for i, folder := range Settings.Folders {
+			switch {
+			case strings.HasPrefix(file, folder):
+				output = append(output, strings.Replace(file, folder, fmt.Sprint(i), 1))
+				break
+			}
+		}
+	}
+	w.Header().Set("Etag", `"index"`)
+	w.Header().Set("Cache-Control", "max-age=86400") // 86400 = 1 day
+	fmt.Fprintf(w, jsonfuncs.ToJson(output))
+}
+
+// -----------------------
 // Init:
 // - Make sure that all important folders are available.
 // - Load settings
@@ -792,6 +814,8 @@ func main() {
 	http.HandleFunc("/type", serveFileTypeTable)          // Serve table of files based on file types
 	http.HandleFunc("/storeSettings", serveStoreSettings) // Serve page for storing settings (ATM restricted to initial setup)
 	http.HandleFunc("/cheatSheet/", ServeStaticText)      // Serve cheat sheet as an html page embedded into the common layout
+	http.HandleFunc("/index", serveFileIndex)             // Serve simple index of all files in json
+
 	http.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])
 	})

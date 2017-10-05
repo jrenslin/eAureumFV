@@ -35,12 +35,21 @@ func Print_page(w http.ResponseWriter, r *http.Request, content string, id strin
 	</head>
 	<body id="` + id + `">
 
+        <div id="search" style="display: none;">
+                <div>
+                    <h2>Search Files</h2>
+                    <input id="searchInput" name="p" />
+                    <ul id="searchSelectors"></ul>
+                </div>
+        </div>
+
 	<nav>` + jsonfuncs.Get_navigation("../json", "../json/navigation.json") + `</nav>
 	`
 
 	fmt.Fprintf(w, head)    // Send start of structure and metatags
 	fmt.Fprintf(w, content) // Send main content
 
+	fmt.Fprintf(w, "\n<script type='text/javascript' src='/js/complete.js'></script>")    // Add js for completioon in search
 	fmt.Fprintf(w, "\n<script type='text/javascript' src='/js/keybindings.js'></script>") // Add js for keybindings
 	fmt.Fprintf(w, "\n\n</body>\n</html>")                                                // Finish the page
 }

@@ -68,7 +68,11 @@ func Get_navigation(datafolder string, filename string) string {
 	output := "<ul>\n"
 	for _, p := range data {
 		output += "  <li>\n"
-		output += "    <a href='" + p.Link + "' id='navigation_" + p.Name + "' />" + p.Name + "</a>\n"
+		output += "    <a "
+		if p.Link != "" { // Only insert href attribute if there is an aim for it.
+			output += "href='" + p.Link + "'"
+		}
+		output += " id='navigation_" + p.Name + "' />" + p.Name + "</a>\n"
 
 		output += "    <ul>\n"
 		for _, subElement := range p.Subnavigation {
