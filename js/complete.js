@@ -11,7 +11,7 @@
 // If possible, from session storage (--> https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API)
 // Else, load data and store it in session storage
 
-var stored = sessionStorage['fileIndex'];
+var stored = sessionStorage[window.location.hostname + 'fileIndex'];
 var elements;
 if (stored) elements = JSON.parse(stored);
 else {
@@ -24,7 +24,7 @@ else {
     var localelements;
     request.onload = function() {
         elements = request.response;
-        sessionStorage['fileIndex'] = JSON.stringify(elements);
+        sessionStorage[window.location.hostname + 'fileIndex'] = JSON.stringify(elements);
     };
 }
 

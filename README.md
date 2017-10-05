@@ -1,10 +1,18 @@
-# <Name>
+# eAureumFV
 
-<Name> is a basic web-based file server written in Go. 
+eAureumFV offers a web-based interface for searching and previewing files. It's written in Go and (Vanilla) JavaScript.
 
-## Get it
+## Features
 
-To download <Name> to your `~/Downloads` folder, build, and run it:
+- Keyboard-driven navigation
+- Navigation to files using the given folder structure or their use cases (images, videos, plain text files)
+- Search through files using regular expressions
+- Previews using HTML5
+- Built-in CBZ viewer
+
+## Setup
+
+To download eAureumFV to your `~/Downloads` folder, build, and run it:
 
 ```
 cd ~/Downloads
@@ -13,18 +21,13 @@ cd <link>/src
 go build && ./src
 ```
 
+Next, connect to localhost on port `9090`, the default port. 
 
-
-For building, golang is required. 
-
-## Features
-
+A setup page is triggered. Here you can set the port eAureumFV listens on and the folders it serves. 
 
 ## Changing settings
 
-When first starting the program and accessing the web interface, the setup is triggered and the settings are stored.
+After the initial setup, the settings cannot be changed from within the program. To change them anyway, delete `./json/settings.json`. Once it is deleted, restart the program. 
 
-After this, the settings cannot be changed from within the program. To still change them, delete `./json/settings.json`. Once it is deleted, restart the program. 
 
-## Purpose
 

@@ -250,7 +250,7 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 
 	content := "<main>\n"
 
-	content += "<h1>*Name*</h1>\n"
+	content += "<h1>eAureumFV</h1>\n"
 	content += "<p class='trail'><a href='/' id='link0'>/</a></p>\n"
 
 	content += "<ul class='tiles'>\n"
@@ -554,7 +554,13 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	// Start with filling the output varibale (content)
 	// -----------
 
-	content := "<main>\n"
+	var content string
+	switch {
+	case fullSized != "":
+		content += "<main class='fullsized'>\n"
+	default:
+		content += "<main>\n"
+	}
 	content += "<h1>" + filepath.Base(folderLocation) + "</h1>\n"
 	content += jhtml.GetTrailHTML(Settings, folderLocation, currentBaseDir, folderNr)
 
@@ -562,12 +568,7 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	// Offer option to show preview in full
 	// -----------
 
-	switch {
-	case fullSized != "":
-		content += "<div class='preview fullsized'>\n"
-	default:
-		content += "<div class='preview'>\n"
-	}
+	content += "<div class='preview'>\n"
 
 	// -----------
 	// Show preview pased on file type of file
@@ -670,6 +671,30 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	content += "</main>\n"
+
+	// -----------
+	// File information
+	// -----------
+	fi, err := os.Stat(folderLocation)
+	if err != nil { // Print error message and exit function
+		fmt.Println("File information on " + filepath.Base(folderLocation) + " not accessible.")
+	}
+	fileSize := fi.Size()
+
+	content += "<section id='fileInfo'>\n"
+
+	// File options: Download etc.
+	content += "<p id='fileOptions'>\n"
+	content += "<a title='Download' href='/static/" + r.URL.Query().Get("p") + "' download>&#x2BC6;</a>\n"
+	content += "</p>\n"
+
+	content += "<dl>\n"
+
+	content += "<dt>File Size</dt><dd>" + jbasefuncs.HumanFilesize(fileSize) + "</dd>\n"
+	content += "<dt>Last Modified</dt><dd>" + fmt.Sprint(fi.ModTime().Format("2006-01-02 15:04")) + "</dd>\n"
+
+	content += "</dl>"
+	content += "</section>\n"
 
 	// -----------
 	// Serve output
