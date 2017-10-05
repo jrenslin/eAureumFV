@@ -32,6 +32,7 @@ else {
 if (document.getElementById('navigation_Search') != null) {
     document.getElementById('navigation_Search').addEventListener("click", function(){
         document.getElementById('search').style = "";
+        document.getElementById('searchInput').focus();
     });
 }
 
