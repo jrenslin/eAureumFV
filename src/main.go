@@ -134,33 +134,10 @@ func listZipContents(file string) []string {
 // Prints the welcome and setup page
 func serveSetup(w http.ResponseWriter, r *http.Request) {
 
-	content := `
-        <section class="fullpage" id="page1">
-          <h1>Welcome to Name</h1>
-          <p>*Name* is a small web-based file server. For more information, see the project page on GitHub.</p>
-          <p>To start with, some settings are required. Click below to start the setup.</p>
-          <a class='buttonlike' href="#page2">Next: Setup</a>
-        </section>
+	// The setup page is almost static, hence it can be stored externally easily.
+	// Here it's fetched and the port is inserted.
+	content := strings.Replace(jbasefuncs.File_get_contents(baseLocation+"htm/setup.htm"), "%s", Settings.Port, 1)
 
-        <section class="fullpage" id="page2">
-          <h2>Setup</h2>
-          <p>First, some settings need to be done.</p>
-          <form action="storeSettings" method="POST">
-            <label for="port">Port</label>
-            <input type="number" name="port" id="port" value="` + Settings.Port + `" />
-            <label for="folders">Folders to serve</label>
-            <textarea name="folders" id="folders" placeholder="Put one folder path per line."></textarea>
-            <button type="submit">Submit</button>
-          </form>
-        </section>
-
-        <!-- js: If no hash is set in the url, open first page -->
-        <script>
-          if(!window.location.hash) {
-            window.location.href = "./#page1";
-          }
-        </script>
-        `
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Starting setup", "")
 	jhtml.Print_page(w, r, content, "setup", jhtml.Get_metatags("Welcome / Setup", "icon", "description", "keywords"))
 
@@ -441,9 +418,6 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	content += "<h1>" + filepath.Base(folderLocation) + "</h1>\n"
 	content += jhtml.GetTrailHTML(Settings, folderLocation, currentBaseDir, folderNr)
 
-	// Show preview pased on file type of file
-	displayType := jbasefuncs.GetKindOfFile(folderLocation)
-
 	// Offer option to show preview in full
 	fullSized := r.URL.Query().Get("fullPreview")
 	switch {
@@ -453,6 +427,8 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		content += "<div class='preview'>\n"
 	}
 
+	// Show preview pased on file type of file
+	displayType := jbasefuncs.GetKindOfFile(folderLocation)
 	switch {
 	case displayType == "audio":
 		content += jhtml.HtmlAudio("/static/" + r.URL.Query().Get("p"))
@@ -590,6 +566,10 @@ func serveZipContents(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Init:
+// - Make sure that all important folders are available.
+// - Load settings
+// - Build indexes of all files and of all files by their types
 func init() {
 
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Initializing ... ", "")
