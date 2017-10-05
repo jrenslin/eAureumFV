@@ -138,6 +138,18 @@ func searchIndexForFileExtensions(extensions []string) []string {
 }
 
 // -----------------------
+// Runs both indexing functions and builds the indexes
+// -----------------------
+
+func runIndexing() {
+	FileIndex = indexAllFiles()                          // Load index of all files
+	for name, extensions := range jbasefuncs.FileTypes { // Index files based on extensions / types
+		FilesByType[name] = searchIndexForFileExtensions(extensions)
+	}
+
+}
+
+// -----------------------
 // Returns a list of all the file names of files within a ZIP
 // -----------------------
 
@@ -202,13 +214,14 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 		folders[key] = strings.Trim(value, "\r")
 	}
 
-	// Write settings to global variable
+	// Write updated settings to global variable
 	Settings.Port = port
 	Settings.Folders = folders
 
-	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Storing settings", "")
+	runIndexing() // Re-build indexes
 
 	// Store newly set settings and redirect to start page
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Storing settings", "")
 	jbasefuncs.File_put_contents(baseLocation+"json/settings.json", jsonfuncs.ToJson(Settings))
 	http.Redirect(w, r, "/", 301)
 
@@ -759,11 +772,7 @@ func init() {
 
 	ensure_working_environment(baseLocation)
 	Settings = jsonfuncs.DecodeSettings(baseLocation + "json/settings.json") // Settings
-	FileIndex = indexAllFiles()                                              // Load index of all files
-
-	for name, extensions := range jbasefuncs.FileTypes {
-		FilesByType[name] = searchIndexForFileExtensions(extensions)
-	}
+	runIndexing()                                                            // Load indexes
 
 }
 
