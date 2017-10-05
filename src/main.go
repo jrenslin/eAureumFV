@@ -52,6 +52,7 @@ func ensure_working_environment(folder string) {
 	jbasefuncs.EnsureDir(folder + "json")
 	jbasefuncs.EnsureDir(folder + "css")
 	jbasefuncs.EnsureDir(folder + "js")
+	jbasefuncs.EnsureDir(folder + "htm")
 	jbasefuncs.EnsureJsonList(folder + "json/navigation.json")
 	// Create a settings file if none exists yet.
 	// Do not set any folders to serve from. Without any set folders, the setup is triggered.
@@ -63,11 +64,16 @@ func ensure_working_environment(folder string) {
 // Serve html pages embedded in the common
 func ServeStaticText(w http.ResponseWriter, r *http.Request) {
 	path := strings.Trim(r.URL.Path[1:], "/")
-	content := `
-        <nav>` + jsonfuncs.Get_navigation("../data", "../data/navigation.json") + `</nav>
 
-        <main>` + jbasefuncs.File_get_contents("../data/"+path+".htm") + "</main>"
-	jhtml.Print_page(w, r, content, path, jhtml.Get_metatags("Page", "icon", "description", "keywords"))
+	if jbasefuncs.FileExists("../htm/"+path+".htm") == false {
+		fmt.Fprintf(w, "../htm/"+path+".htm")
+		return
+	}
+
+	content := `
+
+        <main>` + jbasefuncs.File_get_contents("../htm/"+path+".htm") + "</main>"
+	jhtml.Print_page(w, r, content, path, jhtml.Get_metatags(path, "icon", "description", "keywords"))
 }
 
 func scandirRecursive(filepath string) []string {
@@ -615,7 +621,7 @@ func main() {
 	http.HandleFunc("/js/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])
 	})
-	http.HandleFunc("/about/", ServeStaticText)
+	http.HandleFunc("/cheatSheet/", ServeStaticText)
 
 	// Serve folders specified in the settings
 	for _, value := range Settings.Folders {

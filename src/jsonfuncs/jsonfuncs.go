@@ -13,7 +13,7 @@ import (
 // ------------------------------------------------
 
 func ToJson(p interface{}) string {
-	bytes, err := json.Marshal(p)
+	bytes, err := json.MarshalIndent(p, "", "    ")
 	jbasefuncs.Check(err)
 	return string(bytes)
 }
@@ -62,6 +62,8 @@ func Get_navigation(datafolder string, filename string) string {
 	err := json.Unmarshal(file, &data)
 
 	jbasefuncs.Check(err)
+
+	jbasefuncs.File_put_contents("../json/navigation.json", ToJson(data))
 
 	output := "<ul>\n"
 	for _, p := range data {
