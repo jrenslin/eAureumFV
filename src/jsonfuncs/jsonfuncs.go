@@ -34,18 +34,19 @@ func DecodeSettings(filename string) Settings {
 	return data
 }
 
-func StoreSettings(filename string, settings Settings) bool {
-
-	return true
-}
-
 // -----------------
 // Navigation element
 // -----------------
 
-type Navelement struct {
+type NavSubElement struct {
 	Name string `json:"name"`
 	Link string `json:"link"`
+}
+
+type NavElement struct {
+	Name          string          `json:"name"`
+	Link          string          `json:"link"`
+	Subnavigation []NavSubElement `json:"sub"`
 }
 
 // -----------------
@@ -57,15 +58,27 @@ func Get_navigation(datafolder string, filename string) string {
 
 	file := jbasefuncs.File_get_contents_bytes(filename)
 
-	var data []Navelement
+	var data []NavElement
 	err := json.Unmarshal(file, &data)
 
 	jbasefuncs.Check(err)
 
-	output := "\n"
+	output := "<ul>\n"
 	for _, p := range data {
-		output += "    <a href='" + p.Link + "' />" + p.Name + "</a>\n"
+		output += "  <li>\n"
+		output += "    <a href='" + p.Link + "' id='navigation_" + p.Name + "' />" + p.Name + "</a>\n"
+
+		output += "    <ul>\n"
+		for _, subElement := range p.Subnavigation {
+			output += "      <li>\n"
+			output += "        <a href='" + subElement.Link + "' id='navigation_" + subElement.Name + "' />" + subElement.Name + "</a>\n"
+			output += "      </li>\n"
+		}
+		output += "    </ul>\n"
+
+		output += "  </li>\n"
 	}
+	output += "</ul>\n"
 
 	return output
 

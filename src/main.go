@@ -240,7 +240,8 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for name, files := range FilesByType {
-		content += "<a><span class='' style='height: " + strconv.FormatFloat(float64(100)/float64(total)*float64(len(files)), 'f', 3, 64) + "%%;'></span>\n"
+		content += "<a href='/type?q=" + name + "&offset=0'>"
+		content += "<span class='' style='height: " + strconv.FormatFloat(float64(100)/float64(total)*float64(len(files)), 'f', 3, 64) + "%%;'></span>\n"
 		content += "<span>" + fmt.Sprint(len(files)) + "</span><span>" + strings.Title(name) + "</span>\n"
 		content += "</a>\n"
 	}
@@ -250,6 +251,77 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 	content += "</section>\n"
 
 	jhtml.Print_page(w, r, content, "startPage", jhtml.Get_metatags("Start page", "icon", "description", "keywords"))
+}
+
+func serveFileTypeTable(w http.ResponseWriter, r *http.Request) {
+
+	selectedType := r.URL.Query().Get("q") // Parse GET parameter
+
+	offsetStr := r.URL.Query().Get("offset") // Get offset from GET parameters
+	if offsetStr == "" {
+		offsetStr = "0"
+	}
+	offset, err := strconv.Atoi(offsetStr) // Parse offset
+	if err != nil {
+		fmt.Fprintf(w, "Invalid offset")
+		return
+	}
+
+	// Write content / output
+	content := "<main>\n" // Initialize content variable
+
+	// Add folders to content
+	content += "<h1>" + strings.Title(selectedType) + "</h1>\n"
+	content += "<p class='trail'><a href='/' id='link0'>/</a></p>"
+
+	// Print table of files and folders
+	content += "\n\n<table>\n"
+	content += "<tr><th>Name</th><th>Size</th><th>Last edit</th></tr>\n"
+	counter := 1
+	for i, file := range FilesByType[selectedType] { // Loop over files
+
+		switch { // Only show ten files at a time
+		case i < offset || i > offset+10:
+			continue
+		}
+
+		fi, err := os.Stat(file)
+		if err != nil { // Print error message and exit function
+			fmt.Println("File information on " + filepath.Base(file) + " not accessible.")
+			continue
+		}
+		fileSize := fi.Size()
+
+		for j, availableFolder := range Settings.Folders {
+			file = strings.Replace(file, availableFolder, fmt.Sprint(j), 1)
+		}
+		content += "<tr>\n"
+		content += "<td class='" + jbasefuncs.GetKindOfFile(file) + "'>"
+		content += "<a href='./file?p=" + file + "' id='link" + fmt.Sprint(counter) + "'>" + filepath.Base(file) + "</a></td>\n"
+		content += "<td>" + jbasefuncs.HumanFilesize(fileSize) + "</td>\n"
+		content += "<td>" + fmt.Sprint(fi.ModTime().Format("2006-01-02 15:04")) + "</td>\n"
+		content += "</tr>\n"
+		counter++
+	}
+
+	content += "</table>\n"
+
+	content += "<p class='offsetswitchers'>\n"
+	content += "<span>" + fmt.Sprint(offset) + " / " + fmt.Sprint(len(FilesByType[selectedType])) + "</span>\n"
+	// Print options to switch to next or previous batch / change offset
+	if offset >= 10 {
+		content += "<a href='/type?q=" + r.URL.Query().Get("q") + "&offset=" + fmt.Sprint(offset-10) + "' rel='prev' id='prev' >" + fmt.Sprint(offset-10) + "</a>\n"
+	}
+	if offset+10 < len(FilesByType[selectedType]) {
+		content += "<a href='/type?q=" + r.URL.Query().Get("q") + "&offset=" + fmt.Sprint(offset+10) + "' rel='next' id='next' >" + fmt.Sprint(offset+10) + "</a>\n"
+	}
+	content += "</p>\n"
+
+	content += "</main>"
+
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving table based on type: ", selectedType)
+	jhtml.Print_page(w, r, content, "typeTable", jhtml.Get_metatags("Table: "+strings.Title(selectedType), "icon", "description", "keywords"))
+
 }
 
 // Function to check if the given folder is a subfolder. Displays folder contents in a table.
@@ -535,6 +607,7 @@ func main() {
 	http.HandleFunc("/dir", serveDirectory)               // Serve directory table
 	http.HandleFunc("/file", serveFile)                   // Serve page for specific files
 	http.HandleFunc("/zip", serveZipContents)             // Serve a file out of a ZIP archive
+	http.HandleFunc("/type", serveFileTypeTable)          // Serve a file out of a ZIP archive
 	http.HandleFunc("/storeSettings", serveStoreSettings) // Serve page for storing settings (ATM restricted to initial setup)
 	http.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])

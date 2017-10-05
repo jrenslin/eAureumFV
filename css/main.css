@@ -37,16 +37,34 @@ table tr > td        { padding: 0.5em 0px; text-align: left; color: #888; }
 table tr > td:before { position: absolute; top: 50%; transform: translate(0px, -50%); right: calc(100% + 1em); }
 
 /*** Generally used, specific elements ***/
-a.buttonlike       { display: inline-block; width: auto; padding: 0.7em 1.2em; border: 3px solid #ddd;
-                     border-radius: 5px; font-size: 0.9em; }
-a.buttonlike:hover { animation: buttonChangeColor 0.5s; color: #fff; background: #888; }
-p.note             { display: block; font-size: 0.8em; margin: 0.5em 0px; padding: 0px 0px; }
+a.buttonlike         { display: inline-block; width: auto; padding: 0.7em 1.2em; border: 3px solid #ddd;
+                       border-radius: 5px; font-size: 0.9em; }
+a.buttonlike:hover   { animation: buttonChangeColor 0.5s; color: #fff; background: #888; }
+p.note               { display: block; font-size: 0.8em; margin: 0.5em 0px; padding: 0px 0px; }
 
 /*** Trail ***/
-p.trail            { margin: 0px 0px; padding: 0.7em 10vw; font-size: 0.9em; background: #3d3d3d; }
-p.trail a          { color: #ccc; vertical-align: middle;  }
-p.trail a:before   { display: inline-block; content: " > "; padding: 0px 0.5em; vertical-align: top; color: #888; }
+p.trail              { margin: 0px 0px; padding: 0.7em 10vw; font-size: 0.9em; background: #3d3d3d; }
+p.trail a            { color: #ccc; vertical-align: middle;  }
+p.trail a:before     { display: inline-block; content: " > "; padding: 0px 0.5em; vertical-align: top; color: #888; }
 p.trail a:first-child:before  { display: none; }
+
+/*** Navigation ***/
+body > nav                          { position: fixed; right: 0px; top: 0px; background: #111; z-index: 10; }
+body > nav:before                   { position: absolute; right:3em; top: 1em; display: block; content: " \002630 "; padding: 0em 0.3em 0.2em 0.3em; font-size: 1.5em; background: #fff; color:#888; border: 2px solid #ddd; z-index: 10; }
+body > nav:hover                    { height: 100%; }
+body > nav:hover:before             { display: none; }
+body > nav ul                       { margin: 0px; padding: 0px; width: 300px; list-style: none; z-index: 11; }
+body > nav > ul                     { display: none; height: 100%;  }
+@media (max-width:65em) { body > nav > ul { padding-top: 5em; }  }
+body > nav:hover > ul               { animation: fade-in 0.5s; display:block; }
+body > nav > ul li                  { position: relative; border-bottom: 1px solid #333; }
+body > nav > ul li a                { display: block; padding: 1em 1em 1em 3em; }
+body > nav > ul li a:hover          { animation: blackBgToGray 0.5s; color: #fff; background: #888; }
+body > nav > ul li a:before         { display: none; content: " < "; position: absolute; top: 48%; left: 2em;
+                                      transform: translate(0%, -50%); }
+body > nav > ul li a:hover:before   { animation: move-left-2-1 0.5s; display: block; left: 1.2em; }
+body > nav > ul > li > ul           { position: absolute; display: none; right: 100%; top: 0px; background: #111; }
+body > nav > ul > li:hover > ul     { animation: fade-in 0.4s; display: block; }
 
 /*** Tiles ***/
 ul.tiles               { display: block; margin-left: -1em; padding: 1em 10vw; }
@@ -59,6 +77,7 @@ ul.tiles li a:before   { display: block; margin-bottom: 0.2em; font-size: 4em; p
 /* Tiled sections */
 div.tiled > div             { display: block; min-height: 40vh; border: 2px solid #ddd; border-radius: 0.3em; }
 div.tiled dl                { margin-top: 0px; padding-top: 0px; }
+
 @media (min-width:65em) {
     div.tiled                          { display: flex; flex-wrap: wrap; }
     div.tiled > div                    { display: inline-block; flex: 1; padding: 1em; min-width: 45%;
@@ -112,7 +131,7 @@ div.preview > div.infoBox:hover > div  { animation: fade-in 0.5s; display: block
 
 /* Buttons for changing the offset in CBZ viewer */
 p.offsetswitchers                      { display: flex; }
-p.offsetswitchers a                    { flex: 1; }
+p.offsetswitchers a                    { flex: 1; vertical-align: middle; }
 p.offsetswitchers a:last-child         { text-align: right; }
 p.offsetswitchers a:hover              { animation: initial; }
 
@@ -123,7 +142,7 @@ body#file a[rel="next"]     { position: absolute; display: inline-block; right: 
                               translate: translate(-50%, -0%); width:30px; padding: 2em 1.3em; }
 
 a[rel="prev"]:before        { display: inline-block; content: " \0025C0 ";  }
-a[rel="next"]:before        { display: inline-block; content: " \0025B6 ";  }
+a[rel="next"]:after         { display: inline-block; content: " \0025B6 ";  }
 
 /*** Charts ***/
 div.barChart         { display: flex !important; width: auto; height: calc(100% - 1.5em); border-bottom: 2px solid #ddd; }
@@ -136,6 +155,12 @@ div.barChart a > span:first-child       { display: block; position: absolute; bo
 div.barChart a:hover > span:first-child { animation: fade-in 0.5s; opacity: 1; }
 div.barChart a > span:last-child        { top: calc(100% + 0.4em); font-size: 0.7em; }
 
+/*** Type table ***/
+body#typeTable    {}
+body#typeTable .offsetswitchers a     { padding: 0.5em; }
+body#typeTable a:before, body#typeTable a:after { vertical-align: top; margin-top: -0.1em; padding: 0px 0.5em; }
+body#typeTable .offsetswitchers       { position: relative; }
+body#typeTable .offsetswitchers span  { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 
 /*** Filetype specific classes determine what symbol is to be displayed ***/
 .directory:before   { display: inline-block; content: " \01F4C1 "; }
@@ -170,4 +195,12 @@ div.barChart a > span:last-child        { top: calc(100% + 0.4em); font-size: 0.
 @keyframes minimalBgColorization {
     from { background: #fff; }
     to   { background: #eee; }
+}
+@keyframes blackBgToGray {
+    from { color: #888; background: #000; }
+    to   { color: #fff; background: #888; }
+}
+@keyframes move-left-2-1 {
+    from { left: 2em;   opacity: 0.4; }
+    to   { left: 1.2em; opacity: 1; }
 }

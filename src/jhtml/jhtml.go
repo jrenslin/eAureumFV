@@ -20,7 +20,7 @@ func Get_metatags(title string, icon string, description string, keywords string
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="width=480, initial-scale=0.7" />
 	<link rel="stylesheet" type="text/css" href="css/main.css" />
-`
+	`
 
 	return metatags
 }
