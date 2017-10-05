@@ -25,19 +25,28 @@ import (
 	"time"
 )
 
-// Declare constants
+// -----------------------
+// Constants
+// -----------------------
+
 const baseLocation = "../"                     // All settings files are located within this directory
 const defaultPort = "9090"                     // The default port to serve on (can be overwritten in settings)
 const timeFormat = "[2006-01-02 15:04:05] "    // Time format for output in terminal
 const localOutputFormat = "%20s %-20s %20s \n" // Determines output in terminal on the computer running this
 
-// Initialize settings as a global variable.
+// -----------------------
+// Global variables
+// -----------------------
+
 var Settings jsonfuncs.Settings
 var FileIndex []string
 var FilesByType = make(map[string][]string)
 
+// -----------------------
 // Function to check if the list of folders to be served is empty.
 // If no, this means that the setup should/can be run.
+// -----------------------
+
 func checkForSettings() bool {
 	if len(Settings.Folders) == 0 {
 		return true
@@ -47,7 +56,10 @@ func checkForSettings() bool {
 
 }
 
+// -----------------------
 // Ensures that all necessary files and directories are existent. In not, creates them.
+// -----------------------
+
 func ensure_working_environment(folder string) {
 	jbasefuncs.EnsureDir(folder + "json")
 	jbasefuncs.EnsureDir(folder + "css")
@@ -61,7 +73,10 @@ func ensure_working_environment(folder string) {
 	}
 }
 
+// -----------------------
 // Serve html pages embedded in the common
+// -----------------------
+
 func ServeStaticText(w http.ResponseWriter, r *http.Request) {
 	path := strings.Trim(r.URL.Path[1:], "/")
 
@@ -76,6 +91,10 @@ func ServeStaticText(w http.ResponseWriter, r *http.Request) {
 	jhtml.Print_page(w, r, content, path, jhtml.Get_metatags(path, "icon", "description", "keywords"))
 }
 
+// -----------------------
+// Scan directories recursively
+// -----------------------
+
 func scandirRecursive(filepath string) []string {
 	var output []string
 	folderContents := jbasefuncs.ScandirFilesFolders(filepath)
@@ -87,18 +106,24 @@ func scandirRecursive(filepath string) []string {
 	return output
 }
 
+// -----------------------
 // Creates index of all files by running scandirRecursive over each folder specified in the settings
+// -----------------------
+
 func indexAllFiles() []string {
 
 	var output []string
 	for _, i := range Settings.Folders {
 		output = append(output, scandirRecursive(i)...)
 	}
-
 	return output
+
 }
 
-// Returns all files
+// -----------------------
+// Returns all files with any of a given list of file extensions
+// -----------------------
+
 func searchIndexForFileExtensions(extensions []string) []string {
 	var output []string
 	for _, extension := range extensions {
@@ -112,7 +137,10 @@ func searchIndexForFileExtensions(extensions []string) []string {
 	return output
 }
 
+// -----------------------
 // Returns a list of all the file names of files within a ZIP
+// -----------------------
+
 func listZipContents(file string) []string {
 
 	var output []string
@@ -131,7 +159,14 @@ func listZipContents(file string) []string {
 	return output
 }
 
+// -----------------------------------------
+// Functions for serving the different pages
+// -----------------------------------------
+
+// -----------------------
 // Prints the welcome and setup page
+// -----------------------
+
 func serveSetup(w http.ResponseWriter, r *http.Request) {
 
 	// The setup page is almost static, hence it can be stored externally easily.
@@ -143,9 +178,12 @@ func serveSetup(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// -----------------------
 // Function to store settings sent via a POST request
 // First checks if settings have already been saved.
 // Abort if yes, to prevent use of this function for any usage besides the initial setup.
+// -----------------------
+
 func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 
 	if checkForSettings() == false { // Check for the existence of sufficient settings.
@@ -176,18 +214,27 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// -----------------------
 // Function serving the start page
 // - Lists all folders from settings
+// - Displays rudimentary statistics
+// -----------------------
+
 func serveStartPage(w http.ResponseWriter, r *http.Request) {
 
+	// -----------
 	// Check if the setup needs to be run
+	// -----------
 	switch {
 	case checkForSettings():
 		serveSetup(w, r)
 		return // Stop function execution if the setup runs
 	}
 
+	// -----------
 	// Start filling output variable (content)
+	// -----------
+
 	content := "<main>\n"
 
 	content += "<h1>*Name*</h1>\n"
@@ -203,7 +250,10 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 
 	content += "</main>\n"
 
-	// Show some statistics
+	// -----------
+	// Write rudimentary "statistics"
+	// -----------
+
 	content += "<section>\n"
 	content += "<h2>Numbers</h2>\n"
 	content += "<div class='tiled'>"
@@ -213,8 +263,9 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 	  <dt>Number of all files</dt><dd>` + fmt.Sprint(len(FileIndex)) + `</dd>
 	</dl>
 	</div>
-
 	`
+
+	// Bar chart on distribution of file types
 
 	content += "<div>\n<div class='barChart'>\n"
 	total := 0
@@ -233,8 +284,17 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 	content += "</div>\n"
 	content += "</section>\n"
 
+	// -----------
+	// Serve output
+	// -----------
+
+	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving startpage: ", "")
 	jhtml.Print_page(w, r, content, "startPage", jhtml.Get_metatags("Start page", "icon", "description", "keywords"))
 }
+
+// -----------------------
+// Prints a table of all files of a given kind (e.g. images, plaintext files, etc.)
+// -----------------------
 
 func serveFileTypeTable(w http.ResponseWriter, r *http.Request) {
 
@@ -250,14 +310,19 @@ func serveFileTypeTable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Write content / output
-	content := "<main>\n" // Initialize content variable
+	// -----------
+	// Write content / output variable
+	// -----------
 
-	// Add folders to content
+	content := "<main>\n"
+
 	content += "<h1>" + strings.Title(selectedType) + "</h1>\n"
 	content += "<p class='trail'><a href='/' id='link0'>/</a></p>"
 
+	// -----------
 	// Print table of files and folders
+	// -----------
+
 	content += "\n\n<table>\n"
 	content += "<tr><th>Name</th><th>Size</th><th>Last edit</th></tr>\n"
 	counter := 1
@@ -268,16 +333,19 @@ func serveFileTypeTable(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		// Get file information
 		fi, err := os.Stat(file)
-		if err != nil { // Print error message and exit function
+		if err != nil {
 			fmt.Println("File information on " + filepath.Base(file) + " not accessible.")
 			continue
 		}
 		fileSize := fi.Size()
 
+		// Check which of the served directories this file is in and add the corresponding link
 		for j, availableFolder := range Settings.Folders {
 			file = strings.Replace(file, availableFolder, fmt.Sprint(j), 1)
 		}
+
 		content += "<tr>\n"
 		content += "<td class='" + jbasefuncs.GetKindOfFile(file) + "'>"
 		content += "<a href='./file?p=" + file + "' id='link" + fmt.Sprint(counter) + "'>" + filepath.Base(file) + "</a></td>\n"
@@ -291,7 +359,11 @@ func serveFileTypeTable(w http.ResponseWriter, r *http.Request) {
 
 	content += "<p class='offsetswitchers'>\n"
 	content += "<span>" + fmt.Sprint(offset) + " / " + fmt.Sprint(len(FilesByType[selectedType])) + "</span>\n"
+
+	// -----------
 	// Print options to switch to next or previous batch / change offset
+	// -----------
+
 	if offset >= 10 {
 		content += "<a href='/type?q=" + r.URL.Query().Get("q") + "&offset=" + fmt.Sprint(offset-10) + "' rel='prev' id='prev' >" + fmt.Sprint(offset-10) + "</a>\n"
 	}
@@ -302,41 +374,66 @@ func serveFileTypeTable(w http.ResponseWriter, r *http.Request) {
 
 	content += "</main>"
 
+	// -----------
+	// Serve output
+	// -----------
+
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving table based on type: ", selectedType)
 	jhtml.Print_page(w, r, content, "typeTable", jhtml.Get_metatags("Table: "+strings.Title(selectedType), "icon", "description", "keywords"))
 
 }
 
-// Function to check if the given folder is a subfolder. Displays folder contents in a table.
+// -----------------------
+// Display folder contents in a table.
+// -----------------------
+
 func serveDirectory(w http.ResponseWriter, r *http.Request) {
 
 	folderLocation := r.URL.Query().Get("p") // Parse GET parameter
 
-	// Replace the beginning of the filepath passed via GET
+	// -----------
+	// Replace the beginning of the filepath passed via GET with the corresponding folder
+	// -----------
+
 	folderNr := strings.Split(folderLocation, "/")[0]
 	folderNrInt, err := strconv.Atoi(folderNr)
-	if err != nil { // Print error message and exit function
+
+	// Check for errors in type conversion / invalid folder numbers
+	if err != nil {
 		fmt.Fprintf(w, "Folder could not be parsed")
+		return
+	} else if folderNrInt > len(Settings.Folders)-1 {
+		fmt.Fprintf(w, "Invalid folder")
 		return
 	}
 	currentBaseDir := Settings.Folders[folderNrInt]
 	folderLocation = strings.Replace(folderLocation, folderNr, currentBaseDir, 1)
 
-	if folderLocation == "" { // Check for invalid folder locations
-		http.Redirect(w, r, "/", 301)
+	// -----------
+	// Get folder contents
+	// -----------
+
+	var folderContents map[string][]string // Initialize folderContents
+	switch {                               // Check for existence of folder before scanning it
+	case jbasefuncs.FileExists(folderLocation):
+		folderContents = jbasefuncs.ScandirFilesFolders(folderLocation) // Get Folder contents split into files and folders
+	default:
+		fmt.Fprintf(w, "Invalid folder.")
 		return
 	}
-	var folderContents map[string][]string                          // Initialize folderContents
-	folderContents = jbasefuncs.ScandirFilesFolders(folderLocation) // Get Folder contents split into files and folders
 
-	// Write content / output
-	content := "<main>\n" // Initialize content variable
+	// -----------
+	// Filling the output variable
+	// -----------
 
-	// Add folders to content
+	content := "<main>\n"
 	content += "<h1>" + filepath.Base(folderLocation) + "</h1>\n"
 	content += jhtml.GetTrailHTML(Settings, folderLocation, currentBaseDir, folderNr)
 
+	// -----------
 	// Print table of files and folders
+	// -----------
+
 	content += "\n\n<table>\n"
 	content += "<tr><th>Name</th><th>Size</th><th>Last edit</th></tr>\n"
 	counter := 1
@@ -377,49 +474,81 @@ func serveDirectory(w http.ResponseWriter, r *http.Request) {
 
 	content += "</main>"
 
+	// -----------
+	// Output
+	// -----------
+
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving table: ", folderLocation)
 	jhtml.Print_page(w, r, content, "directoryTable", jhtml.Get_metatags("Directory: "+filepath.Base(folderLocation), "icon", "description", "keywords"))
 
 }
 
+// -----------------------
+// Serves single files
+// -----------------------
+
 func serveFile(w http.ResponseWriter, r *http.Request) {
 
 	folderLocation := r.URL.Query().Get("p")
+	fullSized := r.URL.Query().Get("fullPreview")
 
-	// Replace the beginning of the filepath passed via GET
+	// -----------
+	// Replace the beginning of the filepath passed via GET with the corresponding folder
+	// -----------
+
 	folderNr := strings.Split(folderLocation, "/")[0]
 	folderNrInt, err := strconv.Atoi(folderNr)
-	if err != nil { // Print error message and exit function
+
+	// Check for errors in type conversion / invalid folder numbers
+	if err != nil {
 		fmt.Fprintf(w, "Folder could not be parsed")
+		return
+	} else if folderNrInt > len(Settings.Folders)-1 {
+		fmt.Fprintf(w, "Invalid folder")
 		return
 	}
 	currentBaseDir := Settings.Folders[folderNrInt]
 	folderLocation = strings.Replace(folderLocation, folderNr, currentBaseDir, 1)
 
-	// Check folder contents to later offer the option to navigate to the previous / next file
+	// -----------
+	// Check folder contents
+	// to later offer the option to navigate to the previous / next file.
+	// -----------
+
 	var folderContents map[string][]string // Initialize folderContents)
+
 	// Check for invalid folder locations
 	if folderLocation == "" || jbasefuncs.FileExists(folderLocation) == false {
-		http.Redirect(w, r, "/", 301)
+		fmt.Fprintf(w, "Invalid filepath")
+		return
 	}
 	folderContents = jbasefuncs.ScandirFilesFolders(strings.Replace(folderLocation, filepath.Base(folderLocation), "", 1))
 
-	// Check position of the currently selected file within the folder
+	// -----------
+	// Check position of the currently selected file within the folder.
 	// Needed later for links to previous and next files.
+	// -----------
+
 	var indexInFolderContents int
 	for i, f := range folderContents["files"] {
 		if f == folderLocation {
 			indexInFolderContents = i
+			break
 		}
 	}
 
+	// -----------
 	// Start with filling the output varibale (content)
+	// -----------
+
 	content := "<main>\n"
 	content += "<h1>" + filepath.Base(folderLocation) + "</h1>\n"
 	content += jhtml.GetTrailHTML(Settings, folderLocation, currentBaseDir, folderNr)
 
+	// -----------
 	// Offer option to show preview in full
-	fullSized := r.URL.Query().Get("fullPreview")
+	// -----------
+
 	switch {
 	case fullSized != "":
 		content += "<div class='preview fullsized'>\n"
@@ -427,7 +556,10 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		content += "<div class='preview'>\n"
 	}
 
+	// -----------
 	// Show preview pased on file type of file
+	// -----------
+
 	displayType := jbasefuncs.GetKindOfFile(folderLocation)
 	switch {
 	case displayType == "audio":
@@ -446,6 +578,9 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		content += jhtml.HtmlCode("/static/"+r.URL.Query().Get("p"), folderLocation)
 	case displayType == "comic": // Display for CBZ files is too specialized to move to html package
 
+		// -----------
+		// Handle offsets
+		// -----------
 		offsetStr := r.URL.Query().Get("offset") // Get offset from GET parameters
 		if offsetStr == "" {
 			offsetStr = "0"
@@ -456,8 +591,11 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// -----------
+		// Get contents and display them
+		// -----------
 		archiveContents := listZipContents(folderLocation)
-		archiveLocation := r.URL.Query().Get("p")
+		archiveLocation := r.URL.Query().Get("p") // Get GET variable p again to use it in links
 
 		if len(archiveContents) == 0 { // Stop if the ZIP is empty or invalid.
 			return
@@ -470,11 +608,16 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 			content += "<img src='/zip?p=" + archiveLocation + "&f=" + fmt.Sprint(i) + "' id='page" + fmt.Sprint(i-offset) + "'/>\n"
 		}
 
+		// -----------
+		// Print info box displaying the number of the currently display file
+		// and offering options to change the offset
+		// -----------
+
 		content += "<div class='infoBox'><div>\n" // Begin of info box
 		content += "<p><span id='current'>0</span> / <span id='max'>" + fmt.Sprint(len(archiveContents)) + "</span></p>\n"
 
-		content += "<p class='offsetswitchers'>\n"
 		// Print options to switch to next or previous batch / change offset
+		content += "<p class='offsetswitchers'>\n"
 		if offset >= 10 {
 			content += "<a class='offsetswitcher' href='/file?p=" + r.URL.Query().Get("p") + "&offset=" + fmt.Sprint(offset-10) + "' id='prevBatch' >" + fmt.Sprint(offset-10) + "</a>\n"
 		}
@@ -484,7 +627,9 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 		content += "</p>\n"
 		content += "</div></div>\n"
 
+		// -----------
 		// Add javascript to show first image if no hash is set
+		// -----------
 		content += `
 	  	<script>
 		if(!window.location.hash) {
@@ -496,7 +641,10 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 	}
 	content += "</div>\n"
 
-	// Add navigation buttons to access next/previous file to output variable
+	// -----------
+	// Add navigation links to access next/previous file to output variable
+	// -----------
+
 	var folderLinkPrev string
 	var folderLinkNext string
 	if indexInFolderContents >= 1 {
@@ -510,32 +658,52 @@ func serveFile(w http.ResponseWriter, r *http.Request) {
 
 	content += "</main>\n"
 
+	// -----------
+	// Serve output
+	// -----------
+
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving file: ", folderLocation)
 	jhtml.Print_page(w, r, content, "file", jhtml.Get_metatags("File: "+filepath.Base(folderLocation), "icon", "description", "keywords"))
 
 }
 
+// -----------------------
 // Serve files from within ZIP-compressed files
 // TODO Test this with ZIPs containing folders
+// -----------------------
+
 func serveZipContents(w http.ResponseWriter, r *http.Request) {
 
 	zipLocation := r.URL.Query().Get("p")
 	fileNoStr := r.URL.Query().Get("f") // The number of the file within the ZIP file
 
-	fileNo, err := strconv.Atoi(fileNoStr)
-	if err != nil {
-		fileNo = 0
-	}
+	// -----------
+	// Get actual location of the archive
+	// -----------
 
-	// Replace the beginning of the filepath passed via GET
+	// Replace the beginning of the filepath passed via GET with the corresponding folder
 	folderNr := strings.Split(zipLocation, "/")[0]
 	folderNrInt, err := strconv.Atoi(folderNr)
-	if err != nil { // Print error message and exit function
+
+	// Check for invalid folder no.
+	if err != nil {
 		fmt.Fprintf(w, "Folder could not be parsed")
+		return
+	} else if folderNrInt > len(Settings.Folders)-1 {
+		fmt.Fprintf(w, "Invalid folder")
 		return
 	}
 	currentBaseDir := Settings.Folders[folderNrInt]
 	zipLocation = strings.Replace(zipLocation, folderNr, currentBaseDir, 1)
+
+	// -----------
+	// Get Number of file within the ZIP archive
+	// -----------
+
+	fileNo, err := strconv.Atoi(fileNoStr)
+	if err != nil {
+		fileNo = 0
+	}
 
 	switch { // Prevent invalid file numbers
 	case fileNo < 0:
@@ -544,12 +712,20 @@ func serveZipContents(w http.ResponseWriter, r *http.Request) {
 		fileNo = jbasefuncs.Max([]int{len(listZipContents(zipLocation)) - 1, 0})
 	}
 
+	// -----------
+	// Read ZIP file
+	// -----------
+
 	z, err := zip.OpenReader(zipLocation)
 	if err != nil { // Print error message and exit function
 		fmt.Fprintf(w, "Archive could not be opened.")
 		return
 	}
 	defer z.Close()
+
+	// -----------
+	// Read file from archive into buffer
+	// -----------
 
 	f := z.File[fileNo]
 
@@ -561,15 +737,22 @@ func serveZipContents(w http.ResponseWriter, r *http.Request) {
 	buffer := new(bytes.Buffer)
 	buffer.ReadFrom(rc)
 
+	// -----------
+	// Serve contents of buffer
+	// -----------
+
 	w.Write(buffer.Bytes()) // Serve the file
 	rc.Close()              // Close the file
 
 }
 
+// -----------------------
 // Init:
 // - Make sure that all important folders are available.
 // - Load settings
 // - Build indexes of all files and of all files by their types
+// -----------------------
+
 func init() {
 
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Initializing ... ", "")
@@ -584,6 +767,10 @@ func init() {
 
 }
 
+// -----------------------
+// Main
+// -----------------------
+
 func main() {
 
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Starting ... ", "")
@@ -593,18 +780,22 @@ func main() {
 	http.HandleFunc("/dir", serveDirectory)               // Serve directory table
 	http.HandleFunc("/file", serveFile)                   // Serve page for specific files
 	http.HandleFunc("/zip", serveZipContents)             // Serve a file out of a ZIP archive
-	http.HandleFunc("/type", serveFileTypeTable)          // Serve a file out of a ZIP archive
+	http.HandleFunc("/type", serveFileTypeTable)          // Serve table of files based on file types
 	http.HandleFunc("/storeSettings", serveStoreSettings) // Serve page for storing settings (ATM restricted to initial setup)
+	http.HandleFunc("/cheatSheet/", ServeStaticText)      // Serve cheat sheet as an html page embedded into the common layout
 	http.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])
 	})
 	http.HandleFunc("/js/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../"+r.URL.Path[1:])
 	})
-	http.HandleFunc("/cheatSheet/", ServeStaticText)
 
 	// Serve folders specified in the settings
 	for _, value := range Settings.Folders {
+
+		// Write contents of values taken from the loop to loop-specific variables.
+		// Without this, the values would change as the loop progresses and
+		//   wrong folders' contents would be bound to a given URL path.
 		var key string
 		var folder string
 		for i, f := range Settings.Folders {

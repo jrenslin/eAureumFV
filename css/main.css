@@ -121,7 +121,7 @@ div.preview > code > span:before    { position: absolute; left: 0px; display: in
                                       content: counter(line); width: 2.5em; color: #aaa; background: #e2e2e2;  }
 div.preview > object[type="application/pdf"] { display: block; height: 100vh; width: 60vw; }
 
-/*** Info box ***/
+/* Info box */
 div.preview > div.infoBox              { position:absolute; top: 1em; left: initial; right: 1em;
                                          transform: initial; text-align: right; }
 div.preview > div.infoBox:before       { content: " \01F6C8 "; display: inline-block; background: #aaa;
@@ -145,6 +145,8 @@ body#file a[rel="next"]     { position: absolute; display: inline-block; right: 
 a[rel="prev"]:before        { display: inline-block; content: " \0025C0 ";  }
 a[rel="next"]:after         { display: inline-block; content: " \0025B6 ";  }
 
+/* Setup page */
+body#setup nav { display: none; }
 
 /* Cheat Sheet */
 body#cheatSheet      {  }
