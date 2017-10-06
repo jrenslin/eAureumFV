@@ -1,38 +1,11 @@
-// -----------------
-// JSON-based backend for goclitr.
-// -----------------
-package jsonfuncs
+// Handles the page navigation
+// The page navigation is stored in a json file
+package eAureumFV
 
 import (
 	"../jbasefuncs"
 	"encoding/json"
 )
-
-// ------------------------------------------------
-// Set functions for different types of JSON files.
-// ------------------------------------------------
-
-func ToJson(p interface{}) string {
-	bytes, err := json.MarshalIndent(p, "", "    ")
-	jbasefuncs.Check(err)
-	return string(bytes)
-}
-
-type Settings struct {
-	Port    string   `json:"port"`
-	Folders []string `json:"folders"`
-}
-
-// Function for decoding the folder list.
-func DecodeSettings(filename string) Settings {
-	file := jbasefuncs.File_get_contents_bytes(filename)
-
-	var data Settings
-	err := json.Unmarshal(file, &data)
-	jbasefuncs.Check(err)
-
-	return data
-}
 
 // -----------------
 // Navigation element
@@ -54,7 +27,7 @@ type NavElement struct {
 // -- Skipping options for reverting navigation back to JSON for now
 // -----------------
 
-func Get_navigation(datafolder string, filename string) string {
+func getNavigation(datafolder string, filename string) string {
 
 	file := jbasefuncs.File_get_contents_bytes(filename)
 
