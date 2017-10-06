@@ -18,6 +18,6 @@ func serveStaticText(w http.ResponseWriter, r *http.Request) {
 
 	content := `
 
-        <main>` + jbasefuncs.File_get_contents("../htm/"+path+".htm") + "</main>"
+        <main>` + jbasefuncs.FileGetContents("../htm/"+path+".htm") + "</main>"
 	htmlPrintPage(w, r, content, path, htmlGetMetatags(path, "icon", "description", "keywords"))
 }

@@ -14,6 +14,6 @@ func ensure_working_environment(folder string) {
 	// Create a settings file if none exists yet.
 	// Do not set any folders to serve from. Without any set folders, the setup is triggered.
 	if jbasefuncs.FileExists(folder+"json/settings.json") == false {
-		jbasefuncs.File_put_contents(folder+"json/settings.json", ToJson(SettingsType{Port: defaultPort}))
+		jbasefuncs.FilePutContents(folder+"json/settings.json", ToJson(SettingsType{Port: defaultPort}))
 	}
 }

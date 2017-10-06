@@ -16,7 +16,7 @@ func serveSetup(w http.ResponseWriter, r *http.Request) {
 
 	// The setup page is almost static, hence it can be stored externally easily.
 	// Here it's fetched and the port is inserted.
-	content := strings.Replace(jbasefuncs.File_get_contents(baseLocation+"htm/setup.htm"), "%s", Settings.Port, 1)
+	content := strings.Replace(jbasefuncs.FileGetContents(baseLocation+"htm/setup.htm"), "%s", Settings.Port, 1)
 
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Starting setup", "")
 	htmlPrintPage(w, r, content, "setup", htmlGetMetatags("Welcome / Setup", "icon", "description", "keywords"))
@@ -55,7 +55,7 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 
 	// Store newly set settings and redirect to start page
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Storing settings", "")
-	jbasefuncs.File_put_contents(baseLocation+"json/settings.json", ToJson(Settings))
+	jbasefuncs.FilePutContents(baseLocation+"json/settings.json", ToJson(Settings))
 	http.Redirect(w, r, "/", 301)
 
 }

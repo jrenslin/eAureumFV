@@ -29,14 +29,14 @@ type NavElement struct {
 
 func getNavigation(datafolder string, filename string) string {
 
-	file := jbasefuncs.File_get_contents_bytes(filename)
+	file := jbasefuncs.FileGetContentsBytes(filename)
 
 	var data []NavElement
 	err := json.Unmarshal(file, &data)
 
 	jbasefuncs.Check(err)
 
-	jbasefuncs.File_put_contents("../json/navigation.json", ToJson(data))
+	jbasefuncs.FilePutContents("../json/navigation.json", ToJson(data))
 
 	output := "<ul>\n"
 	for _, p := range data {

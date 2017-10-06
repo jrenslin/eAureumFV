@@ -50,11 +50,11 @@ func HtmlWebPage(src string) string { // HTML output for displaying html files i
 	return "<iframe src='" + src + "'></iframe>"
 }
 func HtmlPlaintext(src string, file string) string { // HTML output for displaying plain text files in a frame
-	return "<div class='plaintextPreview'>" + jbasefuncs.File_get_contents(file) + "</div>"
+	return "<div class='plaintextPreview'>" + jbasefuncs.FileGetContents(file) + "</div>"
 }
 func HtmlCode(src string, file string) string { // HTML output for displaying code in a frame
 	// For css line numbering, the output needs to be split into single lines
-	fileContent := jbasefuncs.File_get_contents(file)
+	fileContent := jbasefuncs.FileGetContents(file)
 	var output string
 	for _, line := range strings.Split(fileContent, "\n") {
 		line = strings.Trim(line, "\r")

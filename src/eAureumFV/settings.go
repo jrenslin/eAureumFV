@@ -14,7 +14,7 @@ type SettingsType struct {
 
 // Function for decoding the folder list.
 func decodeSettings(filename string) SettingsType {
-	file := jbasefuncs.File_get_contents_bytes(filename)
+	file := jbasefuncs.FileGetContentsBytes(filename)
 
 	var data SettingsType
 	err := json.Unmarshal(file, &data)
