@@ -38,7 +38,7 @@ func htmlPrintPage(w http.ResponseWriter, r *http.Request, content string, id st
                 </div>
         </div>
 
-	<nav>` + getNavigation("../json", "../json/navigation.json") + `</nav>
+	<nav>` + getNavigation(baseLocation+"json", baseLocation+"json/navigation.json") + `</nav>
 	`
 
 	fmt.Fprintf(w, head)    // Send start of structure and metatags

@@ -41,6 +41,8 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 	port := r.Form.Get("port")
 	rawFolders := r.Form.Get("folders")
 
+	rawFolders = strings.Trim(rawFolders, " \n") // Remove trailing lines
+
 	// Split folders by line
 	folders := strings.Split(rawFolders, "\n")
 	for key, value := range folders {
@@ -51,11 +53,13 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 	Settings.Port = port
 	Settings.Folders = folders
 
-	runIndexing() // Re-build indexes
+	fmt.Println(baseLocation + "json/settings.json")
 
 	// Store newly set settings and redirect to start page
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Storing settings", "")
 	jbasefuncs.FilePutContents(baseLocation+"json/settings.json", ToJson(Settings))
+
+	runIndexing() // Re-build indexes
 	http.Redirect(w, r, "/", 301)
 
 }

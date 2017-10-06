@@ -36,8 +36,6 @@ func getNavigation(datafolder string, filename string) string {
 
 	jbasefuncs.Check(err)
 
-	jbasefuncs.FilePutContents("../json/navigation.json", ToJson(data))
-
 	output := "<ul>\n"
 	for _, p := range data {
 		output += "  <li>\n"
