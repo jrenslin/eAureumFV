@@ -16,9 +16,9 @@ To download eAureumFV to your `~/Downloads` folder, build, and run it:
 
 ```
 cd ~/Downloads
-git clone <link>
-cd <link>/src
-go build && ./src
+git clone https://github.com/jrenslin/eAureumFV.git
+cd eAureumFV
+go build && ./eAureumFV
 ```
 
 Next, connect to `localhost` on port `9090`, the default port. 
