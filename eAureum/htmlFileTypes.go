@@ -1,7 +1,7 @@
 package eAureumFV
 
 import (
-	"../jbasefuncs"
+        jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"strings"
 )
 

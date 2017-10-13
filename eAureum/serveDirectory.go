@@ -2,7 +2,7 @@
 package eAureumFV
 
 import (
-	"../jbasefuncs"
+        jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"fmt"
 	"net/http"
 	"os"

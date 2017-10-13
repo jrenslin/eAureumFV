@@ -2,7 +2,7 @@
 package eAureumFV
 
 import (
-	"../jbasefuncs"
+	jbasefuncs "github.com/jrenslin/jbasefuncs"
 )
 
 func ensure_working_environment(folder string) {
