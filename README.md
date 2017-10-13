@@ -25,6 +25,18 @@ Next, connect to `localhost` on port `9090`, the default port.
 
 A setup page is triggered. Here you can set the port eAureumFV listens on and the folders it serves. 
 
+### Requirements
+
+To build eAureumFV, the following package needs to be installed:
+
+- jbasefuncs (https://github.com/jrenslin/jbasefuncs)
+
+Run:
+
+```
+go get github.com/jrenslin/jbasefuncs
+```
+
 ## Changing settings
 
 After the initial setup, the settings cannot be changed from within the program. To change them anyway, delete `./json/settings.json`. Once it is deleted, restart the program. 
