@@ -51,7 +51,7 @@ function emptyElement (id) {
 
 // Add an new option
 function addSelectOption (path) {
-    var li = document.createElement("li");                           // Create a <p> node
+    var li = document.createElement("li");                           // Create a <li> node
     var t = document.createTextNode(path);                           // Create a text node
     li.addEventListener("click", function(){
         window.location.href = "/file?p="+ path;
