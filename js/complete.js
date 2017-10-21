@@ -56,8 +56,8 @@ function addSelectOption (path) {
     li.addEventListener("click", function(){
         window.location.href = "/file?p="+ path;
     });
-    li.appendChild(t);                                               // Append the text to <p>
-    document.getElementById("searchSelectors").appendChild(li);      // Append <p> to <div> with id="myDIV"
+    li.appendChild(t);                                               // Append the text to <li>
+    document.getElementById("searchSelectors").appendChild(li);      // Append <li> to <ul> with id="searchSelectors"
 }
 
 // Search through list of files and add appropriate options to list
