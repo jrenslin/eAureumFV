@@ -13,5 +13,5 @@ func setHeaders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
 	w.Header().Set("Strict-Transport-Security", "max-age=63072000")
 
-	w.Header().Set("Content-Security-Policy", "default-src https:; font-src 'self'; object-src 'none'; frame-src 'self'; frame-ancestors 'self'; base-uri 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'")
+	w.Header().Set("Content-Security-Policy", "default-src https:; font-src 'self'; object-src 'self'; frame-src 'self'; frame-ancestors 'self'; base-uri 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'")
 }
