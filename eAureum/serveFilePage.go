@@ -156,13 +156,7 @@ func serveFilePage(w http.ResponseWriter, r *http.Request) {
 		// -----------
 		// Add javascript to show first image if no hash is set
 		// -----------
-		content += `
-	  	<script>
-		if(!window.location.hash) {
-			window.location.href = "./file?p=` + r.URL.Query().Get("p") + `&offset=` + fmt.Sprint(offset) + `#page0";
-		}
-		</script>
-		`
+		content += `<script type='text/javascript' src='/js/demandHash.js'></script>`
 
 	}
 	content += "</div>\n"
