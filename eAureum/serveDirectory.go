@@ -2,8 +2,8 @@
 package eAureumFV
 
 import (
-        jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"fmt"
+	jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -102,6 +102,8 @@ func serveDirectory(w http.ResponseWriter, r *http.Request) {
 	// -----------
 	// Output
 	// -----------
+
+	setHeaders(w, r)
 
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving table: ", folderLocation)
 	htmlPrintPage(w, r, content, "directoryTable", htmlGetMetatags("Directory: "+filepath.Base(folderLocation), "icon", "description", "keywords"))

@@ -2,8 +2,8 @@
 package eAureumFV
 
 import (
-        jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"fmt"
+	jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -93,6 +93,8 @@ func serveFileTypeTable(w http.ResponseWriter, r *http.Request) {
 	// -----------
 	// Serve output
 	// -----------
+
+	setHeaders(w, r)
 
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving table based on type: ", selectedType)
 	htmlPrintPage(w, r, content, "typeTable", htmlGetMetatags("Table: "+strings.Title(selectedType), "icon", "description", "keywords"))

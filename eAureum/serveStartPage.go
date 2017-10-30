@@ -80,6 +80,8 @@ func serveStartPage(w http.ResponseWriter, r *http.Request) {
 	// Serve output
 	// -----------
 
+	setHeaders(w, r)
+
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving startpage: ", "")
 	htmlPrintPage(w, r, content, "startPage", htmlGetMetatags("Start page", "icon", "description", "keywords"))
 }

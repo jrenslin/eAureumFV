@@ -2,8 +2,8 @@
 package eAureumFV
 
 import (
-        jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"fmt"
+	jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"net/http"
 	"strings"
 )
@@ -19,5 +19,7 @@ func serveStaticText(w http.ResponseWriter, r *http.Request) {
 	content := `
 
         <main>` + jbasefuncs.FileGetContents(baseLocation+"htm/"+path+".htm") + "</main>"
+
+	setHeaders(w, r)
 	htmlPrintPage(w, r, content, path, htmlGetMetatags(path, "icon", "description", "keywords"))
 }

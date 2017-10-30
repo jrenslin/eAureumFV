@@ -1,8 +1,8 @@
 package eAureumFV
 
 import (
-        jbasefuncs "github.com/jrenslin/jbasefuncs"   
 	"fmt"
+	jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"net/http"
 	"strings"
 	"time"
@@ -55,6 +55,8 @@ func serveStoreSettings(w http.ResponseWriter, r *http.Request) {
 	Settings.Folders = folders
 
 	fmt.Println(baseLocation + "json/settings.json")
+
+	setHeaders(w, r)
 
 	// Store newly set settings and redirect to start page
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Storing settings", "")

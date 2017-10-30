@@ -22,5 +22,6 @@ func serveFileIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Etag", `"index"`)
 	w.Header().Set("Cache-Control", "max-age=86400") // 86400 = 1 day
+	setHeaders(w, r)
 	fmt.Fprintf(w, ToJson(output))
 }

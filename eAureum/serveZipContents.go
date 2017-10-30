@@ -1,10 +1,10 @@
 package eAureumFV
 
 import (
-        jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"archive/zip"
 	"bytes"
 	"fmt"
+	jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"net/http"
 	"strconv"
 	"strings"
@@ -54,6 +54,12 @@ func serveZipContents(w http.ResponseWriter, r *http.Request) {
 	case fileNo > len(listZipContents(zipLocation)):
 		fileNo = jbasefuncs.Max([]int{len(listZipContents(zipLocation)) - 1, 0})
 	}
+
+	// -----------
+	// Set headers before any output
+	// -----------
+
+	setHeaders(w, r)
 
 	// -----------
 	// Read ZIP file

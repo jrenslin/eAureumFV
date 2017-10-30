@@ -2,8 +2,8 @@
 package eAureumFV
 
 import (
-        jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"fmt"
+	jbasefuncs "github.com/jrenslin/jbasefuncs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -211,6 +211,9 @@ func serveFilePage(w http.ResponseWriter, r *http.Request) {
 	// -----------
 	// Serve output
 	// -----------
+
+	setHeaders(w, r)
+
 	fmt.Printf(localOutputFormat, time.Now().Format(timeFormat), "Serving file: ", folderLocation)
 	htmlPrintPage(w, r, content, "file", htmlGetMetatags("File: "+filepath.Base(folderLocation), "icon", "description", "keywords"))
 
