@@ -1,0 +1,13 @@
+{
+    "name": "eAureumFV",
+    "description": "eAureumFV offers a web-based interface for searching and previewing files.",
+    "repository": {
+        "url": "https://github.com/jrenslin/eAureumFV",
+        "license": "MIT"
+    },
+    "keywords": [
+        "Golang",
+        "html5",
+        "JavaScript"
+    ]
+}

@@ -24,10 +24,16 @@ func Run() {
 	http.HandleFunc("/index", serveFileIndex)             // Serve simple index of all files in json
 
 	http.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
+		setHeaders(w, r)
 		http.ServeFile(w, r, baseLocation+r.URL.Path[1:])
 	})
 	http.HandleFunc("/js/", func(w http.ResponseWriter, r *http.Request) {
+		setHeaders(w, r)
 		http.ServeFile(w, r, baseLocation+r.URL.Path[1:])
+	})
+	http.HandleFunc("/contribute.json", func(w http.ResponseWriter, r *http.Request) {
+		setHeaders(w, r)
+		http.ServeFile(w, r, baseLocation+"json/contribute.json")
 	})
 
 	// Serve folders specified in the settings
